@@ -42,7 +42,18 @@
                     key: 'path',
                     d: "M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
                 })
-            ]);
+        function HandHeart({ className }) {
+            return React.createElement('svg', {
+                className: className,
+                fill: "none",
+                stroke: "currentColor",
+                viewBox: "0 0 24 24"
+            }, React.createElement('path', {
+                strokeLinecap: "round",
+                strokeLinejoin: "round",
+                strokeWidth: 2,
+                d: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+            }));
         }
 
         function List({ className, onClick }) {
@@ -179,18 +190,65 @@
             }));
         }
 
-        function HandHeart({ className }) {
+        function BarChart({ className }) {
             return React.createElement('svg', {
                 className: className,
                 fill: "none",
                 stroke: "currentColor",
                 viewBox: "0 0 24 24"
+            }, [
+                React.createElement('line', { key: 'x-axis', x1: "18", y1: "20", x2: "18", y2: "10" }),
+                React.createElement('line', { key: 'y-axis', x1: "12", y1: "20", x2: "12", y2: "4" }),
+                React.createElement('line', { key: 'bar1', x1: "6", y1: "20", x2: "6", y2: "14" })
+            ]);
+        }
+
+        function TrendingUp({ className }) {
+            return React.createElement('svg', {
+                className: className,
+                fill: "none",
+                stroke: "currentColor",
+                viewBox: "0 0 24 24"
+            }, [
+                React.createElement('polyline', { key: 'line', points: "23,6 13.5,15.5 8.5,10.5 1,18" }),
+                React.createElement('polyline', { key: 'arrow', points: "17,6 23,6 23,12" })
+            ]);
+        }
+
+        function Crown({ className }) {
+            return React.createElement('svg', {
+                className: className,
+                fill: "currentColor",
+                viewBox: "0 0 24 24"
             }, React.createElement('path', {
-                strokeLinecap: "round",
-                strokeLinejoin: "round",
-                strokeWidth: 2,
-                d: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                d: "M5 16L3 6l5.5 4L12 4l3.5 6L21 6l-2 10H5zM12 18v2h8v2H4v-2h8v-2h0z"
             }));
+        }
+
+        function Calendar({ className }) {
+            return React.createElement('svg', {
+                className: className,
+                fill: "none",
+                stroke: "currentColor",
+                viewBox: "0 0 24 24"
+            }, [
+                React.createElement('rect', { key: 'rect', x: "3", y: "4", width: "18", height: "18", rx: "2", ry: "2" }),
+                React.createElement('line', { key: 'line1', x1: "16", y1: "2", x2: "16", y2: "6" }),
+                React.createElement('line', { key: 'line2', x1: "8", y1: "2", x2: "8", y2: "6" }),
+                React.createElement('line', { key: 'line3', x1: "3", y1: "10", x2: "21", y2: "10" })
+            ]);
+        }
+
+        function Search({ className }) {
+            return React.createElement('svg', {
+                className: className,
+                fill: "none",
+                stroke: "currentColor",
+                viewBox: "0 0 24 24"
+            }, [
+                React.createElement('circle', { key: 'circle', cx: "11", cy: "11", r: "8" }),
+                React.createElement('path', { key: 'path', d: "m21 21-4.35-4.35" })
+            ]);
         }
 
         // 메인 앱 컴포넌트
@@ -203,6 +261,11 @@
             const [showHistory, setShowHistory] = useState(false);
             const [showCelebration, setShowCelebration] = useState(false);
             const [showSettings, setShowSettings] = useState(false);
+            const [showAdmin, setShowAdmin] = useState(false);
+            const [adminPassword, setAdminPassword] = useState('');
+            const [isAdmin, setIsAdmin] = useState(false);
+            const [searchTerm, setSearchTerm] = useState('');
+            const [dateFilter, setDateFilter] = useState('all');
             const [googleSheetsUrl, setGoogleSheetsUrl] = useState('');
 
             const mbtiTypes = [
@@ -245,6 +308,120 @@
                     console.log('Google Sheets 저장 실패:', error);
                     return false;
                 }
+            // 관리자 인증
+            const handleAdminLogin = function() {
+                if (adminPassword === 'admin2024' || adminPassword === '교회관리자') {
+                    setIsAdmin(true);
+                    setShowAdmin(true);
+                    setAdminPassword('');
+                } else {
+                    alert('관리자 비밀번호가 틀렸습니다.');
+                    setAdminPassword('');
+                }
+            };
+
+            // 통계 계산 함수들
+            const getStats = function() {
+                if (testHistory.length === 0) {
+                    return {
+                        totalTests: 0,
+                        averageScore: 0,
+                        topMBTI: '',
+                        topCombo: '',
+                        todayTests: 0,
+                        weekTests: 0
+                    };
+                }
+
+                const today = new Date().toLocaleDateString('ko-KR');
+                const oneWeekAgo = new Date();
+                oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+                const todayTests = testHistory.filter(function(record) {
+                    return record.date === today;
+                }).length;
+
+                const weekTests = testHistory.filter(function(record) {
+                    const recordDate = new Date(record.date);
+                    return recordDate >= oneWeekAgo;
+                }).length;
+
+                const totalScore = testHistory.reduce(function(sum, record) {
+                    return sum + record.score;
+                }, 0);
+
+                const mbtiCount = {};
+                const comboCount = {};
+
+                testHistory.forEach(function(record) {
+                    // MBTI 개별 카운트
+                    mbtiCount[record.person1.mbti] = (mbtiCount[record.person1.mbti] || 0) + 1;
+                    mbtiCount[record.person2.mbti] = (mbtiCount[record.person2.mbti] || 0) + 1;
+
+                    // 조합 카운트
+                    const combo = [record.person1.mbti, record.person2.mbti].sort().join('-');
+                    comboCount[combo] = (comboCount[combo] || 0) + 1;
+                });
+
+                const topMBTI = Object.keys(mbtiCount).reduce(function(a, b) {
+                    return mbtiCount[a] > mbtiCount[b] ? a : b;
+                }, '');
+
+                const topCombo = Object.keys(comboCount).reduce(function(a, b) {
+                    return comboCount[a] > comboCount[b] ? a : b;
+                }, '');
+
+                return {
+                    totalTests: testHistory.length,
+                    averageScore: Math.round(totalScore / testHistory.length),
+                    topMBTI: topMBTI,
+                    topCombo: topCombo,
+                    todayTests: todayTests,
+                    weekTests: weekTests,
+                    mbtiDistribution: mbtiCount,
+                    comboDistribution: comboCount
+                };
+            };
+
+            // 필터링된 기록 가져오기
+            const getFilteredHistory = function() {
+                let filtered = testHistory;
+
+                // 검색 필터
+                if (searchTerm) {
+                    filtered = filtered.filter(function(record) {
+                        return record.person1.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                               record.person2.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                               record.person1.mbti.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                               record.person2.mbti.toLowerCase().includes(searchTerm.toLowerCase());
+                    });
+                }
+
+                // 날짜 필터
+                if (dateFilter !== 'all') {
+                    const today = new Date();
+                    const filterDate = new Date();
+                    
+                    if (dateFilter === 'today') {
+                        filtered = filtered.filter(function(record) {
+                            return record.date === today.toLocaleDateString('ko-KR');
+                        });
+                    } else if (dateFilter === 'week') {
+                        filterDate.setDate(filterDate.getDate() - 7);
+                        filtered = filtered.filter(function(record) {
+                            const recordDate = new Date(record.date);
+                            return recordDate >= filterDate;
+                        });
+                    } else if (dateFilter === 'month') {
+                        filterDate.setMonth(filterDate.getMonth() - 1);
+                        filtered = filtered.filter(function(record) {
+                            const recordDate = new Date(record.date);
+                            return recordDate >= filterDate;
+                        });
+                    }
+                }
+
+                return filtered;
             };
 
             // 기록 저장하기
@@ -258,11 +435,16 @@
                     time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
                 };
                 
+                // 로컬에만 저장 (개인 기록)
                 const updatedHistory = [newRecord, ...testHistory].slice(0, 50);
                 setTestHistory(updatedHistory);
                 localStorage.setItem('mbtiChemistryHistory', JSON.stringify(updatedHistory));
                 
-                await saveToGoogleSheets(newRecord);
+                // 구글시트 저장은 사용자가 명시적으로 동의한 경우에만
+                const allowSharing = localStorage.getItem('allowDataSharing') === 'true';
+                if (allowSharing && googleSheetsUrl) {
+                    await saveToGoogleSheets(newRecord);
+                }
             };
 
             // MBTI 케미 계산 로직
@@ -424,8 +606,238 @@
                 }
             };
 
-            // 설정 화면
-            if (showSettings) {
+            // 관리자 대시보드
+            if (showAdmin && isAdmin) {
+                const stats = getStats();
+                const filteredHistory = getFilteredHistory();
+
+                return React.createElement('div', {
+                    className: "min-h-screen bg-gradient-to-br from-purple-50 to-indigo-50 p-4"
+                }, React.createElement('div', {
+                    className: "max-w-6xl mx-auto"
+                }, [
+                    // 헤더
+                    React.createElement('div', {
+                        key: 'header',
+                        className: "bg-white rounded-3xl shadow-xl p-6 mb-6"
+                    }, [
+                        React.createElement('div', {
+                            key: 'title-section',
+                            className: "flex items-center justify-between mb-6"
+                        }, [
+                            React.createElement('div', {
+                                key: 'title',
+                                className: "flex items-center"
+                            }, [
+                                React.createElement(Crown, { key: 'crown', className: "w-8 h-8 text-yellow-500 mr-3" }),
+                                React.createElement('h1', { key: 'text', className: "text-3xl font-bold text-gray-800" }, '관리자 대시보드')
+                            ]),
+                            React.createElement('button', {
+                                key: 'logout',
+                                onClick: function() { 
+                                    setIsAdmin(false); 
+                                    setShowAdmin(false); 
+                                },
+                                className: "bg-red-100 text-red-700 px-4 py-2 rounded-xl hover:bg-red-200 transition-all"
+                            }, '로그아웃')
+                        ]),
+                        
+                        // 필터 섹션
+                        React.createElement('div', {
+                            key: 'filters',
+                            className: "grid grid-cols-1 md:grid-cols-2 gap-4"
+                        }, [
+                            React.createElement('div', {
+                                key: 'search',
+                                className: "relative"
+                            }, [
+                                React.createElement(Search, { key: 'icon', className: "absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" }),
+                                React.createElement('input', {
+                                    key: 'input',
+                                    type: 'text',
+                                    placeholder: '이름 또는 MBTI로 검색...',
+                                    value: searchTerm,
+                                    onChange: function(e) { setSearchTerm(e.target.value); },
+                                    className: "w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-600 focus:outline-none"
+                                })
+                            ]),
+                            React.createElement('select', {
+                                key: 'date-filter',
+                                value: dateFilter,
+                                onChange: function(e) { setDateFilter(e.target.value); },
+                                className: "w-full p-3 border-2 border-gray-200 rounded-xl focus:border-purple-600 focus:outline-none"
+                            }, [
+                                React.createElement('option', { key: 'all', value: 'all' }, '전체 기간'),
+                                React.createElement('option', { key: 'today', value: 'today' }, '오늘'),
+                                React.createElement('option', { key: 'week', value: 'week' }, '최근 1주일'),
+                                React.createElement('option', { key: 'month', value: 'month' }, '최근 1개월')
+                            ])
+                        ])
+                    ]),
+
+                    // 통계 카드들
+                    React.createElement('div', {
+                        key: 'stats-grid',
+                        className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6"
+                    }, [
+                        // 총 테스트 수
+                        React.createElement('div', {
+                            key: 'total-tests',
+                            className: "bg-white rounded-2xl shadow-lg p-6"
+                        }, [
+                            React.createElement('div', {
+                                key: 'header',
+                                className: "flex items-center justify-between mb-4"
+                            }, [
+                                React.createElement('h3', { key: 'title', className: "font-semibold text-gray-700" }, '총 테스트 수'),
+                                React.createElement(BarChart, { key: 'icon', className: "w-6 h-6 text-blue-500" })
+                            ]),
+                            React.createElement('div', { key: 'number', className: "text-3xl font-bold text-blue-600" }, stats.totalTests),
+                            React.createElement('p', { key: 'desc', className: "text-sm text-gray-500 mt-2" }, '전체 케미 테스트 횟수')
+                        ]),
+
+                        // 평균 케미 점수
+                        React.createElement('div', {
+                            key: 'avg-score',
+                            className: "bg-white rounded-2xl shadow-lg p-6"
+                        }, [
+                            React.createElement('div', {
+                                key: 'header',
+                                className: "flex items-center justify-between mb-4"
+                            }, [
+                                React.createElement('h3', { key: 'title', className: "font-semibold text-gray-700" }, '평균 케미 점수'),
+                                React.createElement(TrendingUp, { key: 'icon', className: "w-6 h-6 text-green-500" })
+                            ]),
+                            React.createElement('div', { key: 'number', className: "text-3xl font-bold text-green-600" }, stats.averageScore + '점'),
+                            React.createElement('p', { key: 'desc', className: "text-sm text-gray-500 mt-2" }, '전체 테스트 평균')
+                        ]),
+
+                        // 인기 MBTI
+                        React.createElement('div', {
+                            key: 'top-mbti',
+                            className: "bg-white rounded-2xl shadow-lg p-6"
+                        }, [
+                            React.createElement('div', {
+                                key: 'header',
+                                className: "flex items-center justify-between mb-4"
+                            }, [
+                                React.createElement('h3', { key: 'title', className: "font-semibold text-gray-700" }, '최다 참여 MBTI'),
+                                React.createElement(Star, { key: 'icon', className: "w-6 h-6 text-yellow-500" })
+                            ]),
+                            React.createElement('div', { key: 'number', className: "text-3xl font-bold text-yellow-600" }, stats.topMBTI || '-'),
+                            React.createElement('p', { key: 'desc', className: "text-sm text-gray-500 mt-2" }, '가장 많이 테스트한 유형')
+                        ]),
+
+                        // 오늘 테스트
+                        React.createElement('div', {
+                            key: 'today-tests',
+                            className: "bg-white rounded-2xl shadow-lg p-6"
+                        }, [
+                            React.createElement('div', {
+                                key: 'header',
+                                className: "flex items-center justify-between mb-4"
+                            }, [
+                                React.createElement('h3', { key: 'title', className: "font-semibold text-gray-700" }, '오늘 테스트'),
+                                React.createElement(Calendar, { key: 'icon', className: "w-6 h-6 text-purple-500" })
+                            ]),
+                            React.createElement('div', { key: 'number', className: "text-3xl font-bold text-purple-600" }, stats.todayTests),
+                            React.createElement('p', { key: 'desc', className: "text-sm text-gray-500 mt-2" }, '금일 진행된 테스트')
+                        ]),
+
+                        // 최고 케미 조합
+                        React.createElement('div', {
+                            key: 'top-combo',
+                            className: "bg-white rounded-2xl shadow-lg p-6"
+                        }, [
+                            React.createElement('div', {
+                                key: 'header',
+                                className: "flex items-center justify-between mb-4"
+                            }, [
+                                React.createElement('h3', { key: 'title', className: "font-semibold text-gray-700" }, '인기 조합'),
+                                React.createElement(Heart, { key: 'icon', className: "w-6 h-6 text-red-500" })
+                            ]),
+                            React.createElement('div', { key: 'number', className: "text-xl font-bold text-red-600" }, stats.topCombo || '-'),
+                            React.createElement('p', { key: 'desc', className: "text-sm text-gray-500 mt-2" }, '가장 많이 테스트된 조합')
+                        ]),
+
+                        // 이번 주 테스트
+                        React.createElement('div', {
+                            key: 'week-tests',
+                            className: "bg-white rounded-2xl shadow-lg p-6"
+                        }, [
+                            React.createElement('div', {
+                                key: 'header',
+                                className: "flex items-center justify-between mb-4"
+                            }, [
+                                React.createElement('h3', { key: 'title', className: "font-semibold text-gray-700" }, '이번 주 테스트'),
+                                React.createElement(TrendingUp, { key: 'icon', className: "w-6 h-6 text-indigo-500" })
+                            ]),
+                            React.createElement('div', { key: 'number', className: "text-3xl font-bold text-indigo-600" }, stats.weekTests),
+                            React.createElement('p', { key: 'desc', className: "text-sm text-gray-500 mt-2" }, '최근 7일간 테스트')
+                        ])
+                    ]),
+
+                    // 상세 기록 테이블
+                    React.createElement('div', {
+                        key: 'records-table',
+                        className: "bg-white rounded-3xl shadow-xl p-6"
+                    }, [
+                        React.createElement('div', {
+                            key: 'table-header',
+                            className: "flex items-center justify-between mb-6"
+                        }, [
+                            React.createElement('h2', { key: 'title', className: "text-2xl font-bold text-gray-800" }, '상세 기록'),
+                            React.createElement('div', { key: 'count', className: "text-sm text-gray-500" }, 
+                                '총 ' + filteredHistory.length + '개 기록'
+                            )
+                        ]),
+                        
+                        filteredHistory.length === 0 
+                            ? React.createElement('div', {
+                                key: 'empty',
+                                className: "text-center py-12 text-gray-500"
+                            }, '검색 결과가 없습니다.')
+                            : React.createElement('div', {
+                                key: 'table-wrapper',
+                                className: "overflow-x-auto"
+                            }, React.createElement('table', {
+                                className: "w-full text-sm"
+                            }, [
+                                React.createElement('thead', { key: 'thead' }, React.createElement('tr', {
+                                    className: "border-b-2 border-gray-200"
+                                }, [
+                                    React.createElement('th', { key: 'date', className: "text-left py-3 px-4 font-semibold text-gray-700" }, '날짜'),
+                                    React.createElement('th', { key: 'time', className: "text-left py-3 px-4 font-semibold text-gray-700" }, '시간'),
+                                    React.createElement('th', { key: 'person1', className: "text-left py-3 px-4 font-semibold text-gray-700" }, '첫 번째'),
+                                    React.createElement('th', { key: 'person2', className: "text-left py-3 px-4 font-semibold text-gray-700" }, '두 번째'),
+                                    React.createElement('th', { key: 'score', className: "text-center py-3 px-4 font-semibold text-gray-700" }, '케미 점수')
+                                ])),
+                                React.createElement('tbody', { key: 'tbody' }, 
+                                    filteredHistory.map(function(record, index) {
+                                        return React.createElement('tr', {
+                                            key: record.id,
+                                            className: index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                                        }, [
+                                            React.createElement('td', { key: 'date', className: "py-3 px-4" }, record.date),
+                                            React.createElement('td', { key: 'time', className: "py-3 px-4" }, record.time),
+                                            React.createElement('td', { key: 'person1', className: "py-3 px-4" }, 
+                                                record.person1.name + ' (' + record.person1.mbti + ')'
+                                            ),
+                                            React.createElement('td', { key: 'person2', className: "py-3 px-4" }, 
+                                                record.person2.name + ' (' + record.person2.mbti + ')'
+                                            ),
+                                            React.createElement('td', { key: 'score', className: "py-3 px-4 text-center" }, 
+                                                React.createElement('span', {
+                                                    className: 'font-bold ' + getScoreColor(record.score)
+                                                }, record.score + '점 ' + getScoreEmoji(record.score))
+                                            )
+                                        ]);
+                                    })
+                                )
+                            ]))
+                    ])
+                ]));
+            }
                 return React.createElement('div', {
                     className: "min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4"
                 }, React.createElement('div', {
@@ -470,7 +882,36 @@
                             React.createElement('p', {
                                 key: 'desc',
                                 className: "text-xs text-gray-500 mt-1"
-                            }, '입력하면 구글시트에 자동으로 기록이 저장됩니다')
+                            }, '입력하면 구글시트에 자동으로 기록이 저장됩니다'),
+                            React.createElement('div', {
+                                key: 'privacy-section',
+                                className: "mt-4 p-3 bg-yellow-50 rounded-xl border border-yellow-200"
+                            }, [
+                                React.createElement('div', {
+                                    key: 'checkbox-section',
+                                    className: "flex items-start space-x-2"
+                                }, [
+                                    React.createElement('input', {
+                                        key: 'checkbox',
+                                        type: 'checkbox',
+                                        id: 'allowSharing',
+                                        checked: localStorage.getItem('allowDataSharing') === 'true',
+                                        onChange: function(e) {
+                                            if (e.target.checked) {
+                                                localStorage.setItem('allowDataSharing', 'true');
+                                            } else {
+                                                localStorage.removeItem('allowDataSharing');
+                                            }
+                                        },
+                                        className: "mt-1"
+                                    }),
+                                    React.createElement('label', {
+                                        key: 'label',
+                                        htmlFor: 'allowSharing',
+                                        className: "text-xs text-gray-700 leading-relaxed cursor-pointer"
+                                    }, '📊 교회 통계 목적으로 내 테스트 결과를 구글시트에 공유하는 것에 동의합니다. (이름과 MBTI만 저장되며, 언제든 해제 가능)')
+                                ])
+                            ])
                         ]),
                         React.createElement('div', {
                             key: 'data-section',
@@ -484,25 +925,34 @@
                                 key: 'buttons',
                                 className: "space-y-3"
                             }, [
-                                React.createElement('button', {
-                                    key: 'download',
-                                    onClick: downloadCSV,
-                                    className: "w-full bg-green-100 text-green-700 font-medium py-3 px-4 rounded-2xl hover:bg-green-200 transition-all flex items-center justify-center"
-                                }, [
-                                    React.createElement(Download, { key: 'icon', className: "w-4 h-4 mr-2" }),
-                                    'CSV 파일로 다운로드 (' + testHistory.length + '개 기록)'
-                                ]),
-                                React.createElement('button', {
-                                    key: 'delete',
-                                    onClick: function() {
-                                        if (confirm('정말로 모든 기록을 삭제하시겠습니까?')) {
-                                            localStorage.removeItem('mbtiChemistryHistory');
-                                            setTestHistory([]);
-                                            alert('모든 기록이 삭제되었습니다.');
-                                        }
-                                    },
-                                    className: "w-full bg-red-100 text-red-700 font-medium py-3 px-4 rounded-2xl hover:bg-red-200 transition-all"
-                                }, '모든 기록 삭제')
+                                            <button
+                                                onClick={downloadCSV}
+                                                className="w-full bg-green-100 text-green-700 font-medium py-3 px-4 rounded-2xl hover:bg-green-200 transition-all flex items-center justify-center"
+                                            >
+                                                <Download className="w-4 h-4 mr-2" />
+                                                CSV 파일로 다운로드 ({testHistory.length}개 기록)
+                                            </button>
+                                            
+                                            <button
+                                                onClick={() => setShowAdmin(true)}
+                                                className="w-full bg-purple-100 text-purple-700 font-medium py-3 px-4 rounded-2xl hover:bg-purple-200 transition-all flex items-center justify-center"
+                                            >
+                                                <Crown className="w-4 h-4 mr-2" />
+                                                관리자 대시보드
+                                            </button>
+                                            
+                                            <button
+                                                onClick={() => {
+                                                    if (confirm('정말로 모든 기록을 삭제하시겠습니까?')) {
+                                                        localStorage.removeItem('mbtiChemistryHistory');
+                                                        setTestHistory([]);
+                                                        alert('모든 기록이 삭제되었습니다.');
+                                                    }
+                                                }}
+                                                className="w-full bg-red-100 text-red-700 font-medium py-3 px-4 rounded-2xl hover:bg-red-200 transition-all"
+                                            >
+                                                모든 기록 삭제
+                                            </button>
                             ])
                         ])
                     ]),
