@@ -6,7 +6,7 @@
     <title>교회 MBTI 케미 체크</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💕</text></svg>">
-    <meta name="description" content="J4U 공동체를 위한 순모임 케미 체크 서비스">
+    <meta name="description" content="J4U공동체 순모임 케미 체크">
     <style>
         .animate-spin {
             animation: spin 1s linear infinite;
@@ -116,11 +116,20 @@
             const updatedHistory = [newRecord, ...appState.testHistory].slice(0, 50);
             updateState({ testHistory: updatedHistory });
             localStorage.setItem('mbtiChemistryHistory', JSON.stringify(updatedHistory));
+        }
+
+        // 이름 마스킹 함수 (관리자가 아닌 경우)
+        function maskName(name) {
+            if (appState.isAdmin) {
+                return name; // 관리자는 전체 이름 표시
+            }
             
-            // 동의한 경우에만 구글시트에 저장
-            const allowSharing = localStorage.getItem('allowDataSharing') === 'true';
-            if (allowSharing && appState.googleSheetsUrl) {
-                await saveToGoogleSheets(newRecord);
+            if (name.length === 1) {
+                return name; // 한 글자는 그대로
+            } else if (name.length === 2) {
+                return name[0] + '*'; // 두 글자: 첫 글자 + *
+            } else {
+                return name[0] + '*'.repeat(name.length - 1); // 세 글자 이상: 첫 글자 + ***
             }
         }
 
@@ -358,7 +367,7 @@
                                     'w-full bg-gray-100 text-gray-700 font-medium py-3 px-6 rounded-2xl hover:bg-gray-200 transition-all')}
                             </div>
                             <div class="mt-6 p-3 bg-blue-50 rounded-xl text-center">
-                                <p class="text-xs text-blue-600">💡 힌트: 없음</p>
+                                <p class="text-xs text-blue-600">💡 힌트: 기본 비밀번호는 "admin2024" 또는 "교회관리자" 입니다</p>
                             </div>
                         </div>
                     </div>
@@ -487,6 +496,17 @@
                                                 `).join('')}
                                             </tbody>
                                         </table>
+                                        
+                                        <div class="mt-6 pt-6 border-t border-gray-200">
+                                            <h3 class="font-medium text-gray-700 mb-3">관리자 도구</h3>
+                                            <div class="flex space-x-3">
+                                                ${createButton('📥 CSV 다운로드', 'downloadCSV()', 
+                                                    'flex-1 bg-green-100 text-green-700 font-medium py-3 px-4 rounded-2xl hover:bg-green-200 transition-all')}
+                                                ${createButton('🗑️ 모든 기록 삭제', 
+                                                    'if(confirm("정말로 모든 기록을 삭제하시겠습니까?")) { localStorage.removeItem("mbtiChemistryHistory"); updateState({testHistory: []}); alert("모든 기록이 삭제되었습니다."); }', 
+                                                    'flex-1 bg-red-100 text-red-700 font-medium py-3 px-4 rounded-2xl hover:bg-red-200 transition-all')}
+                                            </div>
+                                        </div>
                                     </div>`
                                 }
                             </div>
@@ -511,42 +531,25 @@
                                         'text-gray-500 hover:text-gray-700 text-2xl')}
                                 </div>
                                 
-                                <div class="space-y-6">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                                            Google Sheets 연동 URL (선택사항)
-                                        </label>
-                                        ${createInput('url', 'https://script.google.com/macros/s/.../exec', appState.googleSheetsUrl, 
-                                            'updateState({googleSheetsUrl: this.value}); localStorage.setItem("googleSheetsUrl", this.value)')}
-                                        <p class="text-xs text-gray-500 mt-1">
-                                            입력하면 구글시트에 자동으로 기록이 저장됩니다
+                                <div class="space-y-4">
+                                    <div class="text-center">
+                                        <h3 class="font-medium text-gray-700 mb-4">관리자 도구</h3>
+                                        ${createButton('👑 관리자 대시보드', 'updateState({showAdmin: true, showSettings: false})', 
+                                            'w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-4 px-6 rounded-2xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-200')}
+                                        <p class="text-xs text-gray-500 mt-2">
+                                            📊 전체 통계, 데이터 관리, CSV 다운로드
                                         </p>
-                                        
-                                        <div class="mt-4 p-3 bg-yellow-50 rounded-xl border border-yellow-200">
-                                            <div class="flex items-start space-x-2">
-                                                <input type="checkbox" id="allowSharing" 
-                                                    ${localStorage.getItem('allowDataSharing') === 'true' ? 'checked' : ''}
-                                                    onchange="localStorage.setItem('allowDataSharing', this.checked ? 'true' : '')"
-                                                    class="mt-1">
-                                                <label for="allowSharing" class="text-xs text-gray-700 leading-relaxed cursor-pointer">
-                                                    📊 교회 통계 목적으로 내 테스트 결과를 구글시트에 공유하는 것에 동의합니다. (이름과 MBTI만 저장되며, 언제든 해제 가능)
-                                                </label>
-                                            </div>
-                                        </div>
                                     </div>
-
+                                    
                                     <div class="border-t pt-4">
-                                        <h3 class="font-medium text-gray-700 mb-3">데이터 관리</h3>
-                                        <div class="space-y-3">
-                                            ${createButton(`📥 CSV 파일로 다운로드 (${appState.testHistory.length}개 기록)`, 'downloadCSV()', 
-                                                'w-full bg-green-100 text-green-700 font-medium py-3 px-4 rounded-2xl hover:bg-green-200 transition-all')}
-                                            
-                                            ${createButton('👑 관리자 대시보드', 'updateState({showAdmin: true})', 
-                                                'w-full bg-purple-100 text-purple-700 font-medium py-3 px-4 rounded-2xl hover:bg-purple-200 transition-all')}
-                                            
-                                            ${createButton('🗑️ 모든 기록 삭제', 
-                                                'if(confirm("정말로 모든 기록을 삭제하시겠습니까?")) { localStorage.removeItem("mbtiChemistryHistory"); updateState({testHistory: []}); alert("모든 기록이 삭제되었습니다."); }', 
-                                                'w-full bg-red-100 text-red-700 font-medium py-3 px-4 rounded-2xl hover:bg-red-200 transition-all')}
+                                        <h3 class="font-medium text-gray-700 mb-3">앱 정보</h3>
+                                        <div class="bg-blue-50 rounded-xl p-4 text-center">
+                                            <p class="text-sm text-blue-800 font-medium mb-2">🏛️ 교회 MBTI 케미 체크</p>
+                                            <p class="text-xs text-blue-600">
+                                                • 5개 영역별 세부 분석<br>
+                                                • 개인정보 보호 (이름 마스킹)<br>
+                                                • 관리자용 통계 대시보드
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -586,10 +589,10 @@
                                             <div class="bg-gray-50 rounded-2xl p-4">
                                                 <div class="flex items-center justify-between mb-2">
                                                     <div class="flex items-center space-x-2">
-                                                        <span class="font-medium text-blue-600">${record.person1.name}</span>
+                                                        <span class="font-medium text-blue-600">${maskName(record.person1.name)}</span>
                                                         <span class="text-xs text-gray-500">(${record.person1.mbti})</span>
                                                         <span class="text-red-500">💕</span>
-                                                        <span class="font-medium text-purple-600">${record.person2.name}</span>
+                                                        <span class="font-medium text-purple-600">${maskName(record.person2.name)}</span>
                                                         <span class="text-xs text-gray-500">(${record.person2.mbti})</span>
                                                     </div>
                                                     <span class="font-bold ${getScoreColor(record.score)}">
