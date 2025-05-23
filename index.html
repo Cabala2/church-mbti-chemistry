@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>교회 MBTI 케미 체크</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💕</text></svg>">
+    <meta name="description" content="교회 공동체를 위한 MBTI 케미 체크 서비스">
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Lucide React 아이콘들을 직접 SVG로 구현
+        const Heart = ({ className }) => (
+            <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+        );
+
+        const Sparkles = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3l1.5 1.5L5 6 3.5 4.5 5 3zM19 17l1.5 1.5L19 20l-1.5-1.5L19 17zM7.5 7.5L9 9l-1.5 1.5L6 9l1.5-1.5zM16.5 16.5L18 18l-1.5 1.5L15 18l1.5-1.5z"/>
+            </svg>
+        );
+
+        const List = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </svg>
+        );
+
+        const Settings = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+        );
+
+        const Download = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+            </svg>
+        );
+
+        const ArrowRight = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12,5 19,12 12,19"></polyline>
+            </svg>
+        );
+
+        const Star = ({ className }) => (
+            <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+                <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+            </svg>
+        );
+
+        // 메인 앱 컴포넌트
+        const MBTIChemistryChecker = () => {
+            const [currentStep, setCurrentStep] = useState('input');
+            const [person1, setPerson1] = useState({ name: '', mbti: '' });
+            const [person2, setPerson2] = useState({ name: '', mbti: '' });
+            const [result, setResult] = useState(null);
+            const [testHistory, setTestHistory] = useState([]);
+            const [showHistory, setShowHistory] = useState(false);
+            const [showCelebration, setShowCelebration] = useState(false);
+            const [showSettings, setShowSettings] = useState(false);
+
+            const mbtiTypes = [
+                'INTJ', 'INTP', 'ENTJ', 'ENTP',
+                'INFJ', 'INFP', 'ENFJ', 'ENFP',
+                'ISTJ', 'ISFJ', 'ESTJ', 'ESFJ',
+                'ISTP', 'ISFP', 'ESTP', 'ESFP'
+            ];
+
+            // 로컬 스토리지에서 기록 불러오기
+            useEffect(() => {
+                const savedHistory = JSON.parse(localStorage.getItem('mbtiChemistryHistory') || '[]');
+                setTestHistory(savedHistory);
+            }, []);
+
+            // Google Sheets에 데이터 저장
+            const saveToGoogleSheets = async (data) => {
+                const GOOGLE_SCRIPT_URL = localStorage.getItem('googleSheetsUrl') || '';
+                
+                if (!GOOGLE_SCRIPT_URL) return false;
+                
+                try {
+                    await fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            person1_name: data.person1.name,
+                            person1_mbti: data.person1.mbti,
+                            person2_name: data.person2.name,
+                            person2_mbti: data.person2.mbti,
+                            score: data.score,
+                            date: data.date,
+                            time: data.time,
+                            timestamp: new Date().toISOString()
+                        })
+                    });
+                    return true;
+                } catch (error) {
+                    console.log('Google Sheets 저장 실패:', error);
+                    return false;
+                }
+            };
+
+            // 기록 저장하기
+            const saveToHistory = async (result) => {
+                const newRecord = {
+                    id: Date.now(),
+                    person1: person1,
+                    person2: person2,
+                    score: result.overall,
+                    date: new Date().toLocaleDateString('ko-KR'),
+                    time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
+                };
+                
+                const updatedHistory = [newRecord, ...testHistory].slice(0, 50);
+                setTestHistory(updatedHistory);
+                localStorage.setItem('mbtiChemistryHistory', JSON.stringify(updatedHistory));
+                
+                await saveToGoogleSheets(newRecord);
+            };
+
+            // MBTI 케미 계산 로직
+            const calculateChemistry = (mbti1, mbti2) => {
+                const compatibility = {
+                    'ENFP-INFJ': 95, 'INFJ-ENFP': 95,
+                    'ESFJ-ISFP': 90, 'ISFP-ESFJ': 90,
+                    'ENTJ-INTP': 88, 'INTP-ENTJ': 88,
+                    'ESTJ-ISFJ': 87, 'ISFJ-ESTJ': 87,
+                    'ENFJ-ESTP': 75, 'ESTP-ENFJ': 75,
+                    'INFP-ENFJ': 78, 'ENFJ-INFP': 78,
+                    'ISTJ-ESFP': 72, 'ESFP-ISTJ': 72,
+                    'ISTP-ENTJ': 74, 'ENTJ-ISTP': 74,
+                    'INTJ-ESFP': 45, 'ESFP-INTJ': 45,
+                    'INTP-ESFJ': 48, 'ESFJ-INTP': 48,
+                    'ISFP-ESTJ': 50, 'ESTJ-ISFP': 50,
+                    'ENTP-ISFJ': 52, 'ISFJ-ENTP': 52,
+                };
+
+                const key = `${mbti1}-${mbti2}`;
+                if (mbti1 === mbti2) return 85;
+                if (compatibility[key]) return compatibility[key];
+                
+                let score = 50;
+                if ((mbti1[0] === 'E' && mbti2[0] === 'I') || (mbti1[0] === 'I' && mbti2[0] === 'E')) score += 15;
+                if (mbti1[1] === mbti2[1]) score += 10;
+                if (mbti1[2] === mbti2[2]) score += 5;
+                if (mbti1[3] === mbti2[3]) score += 10;
+                
+                return Math.min(score, 95);
+            };
+
+            const getDetailedScores = (mbti1, mbti2) => {
+                const baseScore = calculateChemistry(mbti1, mbti2);
+                return {
+                    travel: Math.min(baseScore + Math.floor(Math.random() * 20) - 10, 100),
+                    faith: Math.min(baseScore + Math.floor(Math.random() * 15) - 7, 100),
+                    conversation: Math.min(baseScore + Math.floor(Math.random() * 25) - 12, 100),
+                    teamwork: Math.min(baseScore + Math.floor(Math.random() * 20) - 10, 100),
+                    service: Math.min(baseScore + Math.floor(Math.random() * 15) - 7, 100)
+                };
+            };
+
+            const getChemistryMessage = (mbti1, mbti2, score) => {
+                const messages = {
+                    'ENFP-INFJ': "와! 영감을 주고받는 환상의 케미! ENFP의 창의적 에너지와 INFJ의 깊은 통찰력이 만나면 정말 특별한 일들이 일어날 거예요!",
+                    'ESFJ-ISFP': "따뜻함이 2배가 되는 조합! ESFJ의 배려심과 ISFP의 진정성이 만나 서로를 더욱 빛나게 해줄 거예요."
+                };
+
+                if (mbti1 === mbti2) {
+                    return "찐친 될 확률 99%! 같은 MBTI끼리는 서로를 너무 잘 이해해서 금세 편안한 사이가 될 것 같아요!";
+                }
+
+                if (messages[`${mbti1}-${mbti2}`] || messages[`${mbti2}-${mbti1}`]) {
+                    return messages[`${mbti1}-${mbti2}`] || messages[`${mbti2}-${mbti1}`];
+                }
+
+                if (score >= 80) return "와! 정말 환상의 케미네요! 함께하면 시너지 폭발할 것 같아요!";
+                if (score >= 60) return "좋은 케미에요! 더 알아갈수록 케미가 업될 거예요!";
+                return "케미를 맞춰가는 재미가 있는 관계네요!";
+            };
+
+            const handleSubmit = () => {
+                if (!person1.name || !person1.mbti || !person2.name || !person2.mbti) {
+                    alert('모든 정보를 입력해주세요!');
+                    return;
+                }
+
+                setCurrentStep('loading');
+                
+                setTimeout(() => {
+                    const overallScore = calculateChemistry(person1.mbti, person2.mbti);
+                    const message = getChemistryMessage(person1.mbti, person2.mbti, overallScore);
+                    const detailedScores = getDetailedScores(person1.mbti, person2.mbti);
+                    
+                    const finalResult = {
+                        overall: overallScore,
+                        message: message,
+                        detailed: detailedScores
+                    };
+                    
+                    setResult(finalResult);
+                    saveToHistory(finalResult);
+                    
+                    if (overallScore >= 90) {
+                        setShowCelebration(true);
+                        setTimeout(() => setShowCelebration(false), 3000);
+                    }
+                    
+                    setCurrentStep('result');
+                }, 2000);
+            };
+
+            const resetTest = () => {
+                setCurrentStep('input');
+                setPerson1({ name: '', mbti: '' });
+                setPerson2({ name: '', mbti: '' });
+                setResult(null);
+                setShowCelebration(false);
+            };
+
+            const getScoreColor = (score) => {
+                if (score >= 80) return 'text-green-600';
+                if (score >= 60) return 'text-blue-600';
+                return 'text-orange-600';
+            };
+
+            const getScoreEmoji = (score) => {
+                if (score >= 90) return '🏆';
+                if (score >= 80) return '🔥';
+                if (score >= 60) return '✨';
+                return '💫';
+            };
+
+            // CSV 다운로드
+            const downloadCSV = () => {
+                if (testHistory.length === 0) {
+                    alert('다운로드할 데이터가 없습니다.');
+                    return;
+                }
+
+                const headers = ['날짜', '시간', '첫번째 이름', '첫번째 MBTI', '두번째 이름', '두번째 MBTI', '케미 점수'];
+                const csvData = testHistory.map(record => [
+                    record.date, record.time, record.person1.name, record.person1.mbti,
+                    record.person2.name, record.person2.mbti, record.score
+                ]);
+
+                const csvContent = [headers, ...csvData]
+                    .map(row => row.map(field => `"${field}"`).join(','))
+                    .join('\n');
+
+                const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `MBTI_케미테스트_기록_${new Date().toLocaleDateString('ko-KR')}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+
+            // 축하 애니메이션
+            const CelebrationOverlay = () => (
+                React.createElement('div', {
+                    className: "fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                }, React.createElement('div', {
+                    className: "bg-white rounded-3xl p-8 max-w-sm mx-4 text-center animate-bounce"
+                }, [
+                    React.createElement('div', { key: 'emoji', className: "text-6xl mb-4" }, '🎉'),
+                    React.createElement('div', { key: 'trophy', className: "text-3xl mb-2" }, '🏆'),
+                    React.createElement('h2', { key: 'title', className: "text-2xl font-bold text-yellow-600 mb-2" }, '환상의 케미!'),
+                    React.createElement('p', { key: 'desc', className: "text-gray-700 mb-4" }, '90점 이상의 놀라운 궁합이에요!'),
+                    React.createElement('div', { key: 'stars', className: "flex justify-center space-x-2" },
+                        [...Array(5)].map((_, i) => 
+                            React.createElement(Star, { key: i, className: "w-6 h-6 text-yellow-500 fill-current animate-pulse" })
+                        )
+                    )
+                ]))
+            );
+
+            // 로딩 화면
+            if (currentStep === 'loading') {
+                return React.createElement('div', {
+                    className: "min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4"
+                }, React.createElement('div', {
+                    className: "bg-white rounded-3xl shadow-xl p-8 max-w-md w-full text-center"
+                }, [
+                    React.createElement('div', { key: 'spinner', className: "animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mx-auto mb-6" }),
+                    React.createElement('h2', { key: 'title', className: "text-xl font-bold text-gray-800 mb-2" }, '케미 분석 중...'),
+                    React.createElement('p', { key: 'desc', className: "text-gray-600" }, '두 분의 특별한 케미를 확인하고 있어요!')
+                ]));
+            }
+
+            // 메인 입력 화면
+            return React.createElement('div', {
+                className: "min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4"
+            }, [
+                showCelebration && React.createElement(CelebrationOverlay, { key: 'celebration' }),
+                React.createElement('div', { key: 'main', className: "max-w-md mx-auto" }, [
+                    React.createElement('div', { key: 'header', className: "text-center mb-8 pt-8" }, [
+                        React.createElement('div', { key: 'title-row', className: "flex items-center justify-center mb-4" }, [
+                            React.createElement(Heart, { key: 'heart', className: "w-8 h-8 text-red-500 mr-2" }),
+                            React.createElement('h1', { key: 'title', className: "text-3xl font-bold text-gray-800" }, 'MBTI 케미 체크'),
+                            React.createElement('div', { key: 'buttons', className: "flex ml-4 space-x-2" }, [
+                                React.createElement('button', {
+                                    key: 'history',
+                                    onClick: () => setShowHistory(true),
+                                    className: "p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-white hover:shadow-md transition-all",
+                                    title: "기록 보기"
+                                }, React.createElement(List, { className: "w-6 h-6" })),
+                                React.createElement('button', {
+                                    key: 'settings',
+                                    onClick: () => setShowSettings(true),
+                                    className: "p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-white hover:shadow-md transition-all",
+                                    title: "설정"
+                                }, React.createElement(Settings, { className: "w-6 h-6" }))
+                            ])
+                        ]),
+                        React.createElement('p', { key: 'desc', className: "text-gray-600" }, '두 사람의 특별한 케미를 확인해보세요!'),
+                        testHistory.length > 0 && React.createElement('p', { key: 'count', className: "text-sm text-blue-600 mt-2" }, `💾 ${testHistory.length}개의 테스트 기록이 있어요`)
+                    ]),
+                    React.createElement('div', { key: 'form', className: "bg-white rounded-3xl shadow-xl p-6 mb-6" }, [
+                        React.createElement('div', { key: 'person1', className: "mb-6" }, [
+                            React.createElement('h3', { key: 'title', className: "text-lg font-semibold text-gray-800 mb-4 flex items-center" }, [
+                                React.createElement('span', { key: 'badge', className: "bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2" }, '1'),
+                                '첫 번째 분'
+                            ]),
+                            React.createElement('div', { key: 'inputs', className: "space-y-4" }, [
+                                React.createElement('input', {
+                                    key: 'name',
+                                    type: "text",
+                                    placeholder: "이름을 입력해주세요",
+                                    value: person1.name,
+                                    onChange: (e) => setPerson1({ ...person1, name: e.target.value }),
+                                    className: "w-full p-4 border-2 border-gray-200 rounded-2xl focus:border-blue-600 focus:outline-none transition-colors"
+                                }),
+                                React.createElement('select', {
+                                    key: 'mbti',
+                                    value: person1.mbti,
+                                    onChange: (e) => setPerson1({ ...person1, mbti: e.target.value }),
+                                    className: "w-full p-4 border-2 border-gray-200 rounded-2xl focus:border-blue-600 focus:outline-none transition-colors"
+                                }, [
+                                    React.createElement('option', { key: 'default', value: "" }, 'MBTI 유형을 선택해주세요'),
+                                    ...mbtiTypes.map(type => 
+                                        React.createElement('option', { key: type, value: type }, type)
+                                    )
+                                ])
+                            ])
+                        ]),
+                        React.createElement('div', { key: 'person2', className: "mb-6" }, [
+                            React.createElement('h3', { key: 'title', className: "text-lg font-semibold text-gray-800 mb-4 flex items-center" }, [
+                                React.createElement('span', { key: 'badge', className: "bg-purple-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2" }, '2'),
+                                '두 번째 분'
+                            ]),
+                            React.createElement('div', { key: 'inputs', className: "space-y-4" }, [
+                                React.createElement('input', {
+                                    key: 'name',
+                                    type: "text",
+                                    placeholder: "이름을 입력해주세요",
+                                    value: person2.name,
+                                    onChange: (e) => setPerson2({ ...person2, name: e.target.value }),
+                                    className: "w-full p-4 border-2 border-gray-200 rounded-2xl focus:border-purple-600 focus:outline-none transition-colors"
+                                }),
+                                React.createElement('select', {
+                                    key: 'mbti',
+                                    value: person2.mbti,
+                                    onChange: (e) => setPerson2({ ...person2, mbti: e.target.value }),
+                                    className: "w-full p-4 border-2 border-gray-200 rounded-2xl focus:border-purple-600 focus:outline-none transition-colors"
+                                }, [
+                                    React.createElement('option', { key: 'default', value: "" }, 'MBTI 유형을 선택해주세요'),
+                                    ...mbtiTypes.map(type => 
+                                        React.createElement('option', { key: type, value: type }, type)
+                                    )
+                                ])
+                            ])
+                        ]),
+                        React.createElement('button', {
+                            key: 'submit',
+                            onClick: handleSubmit,
+                            className: "w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-4 px-6 rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg flex items-center justify-center"
+                        }, [
+                            '케미 확인하기',
+                            React.createElement(ArrowRight, { key: 'arrow', className: "w-5 h-5 ml-2" })
+                        ])
+                    ])
+                ])
+            ]);
+        };
+
+        // 앱 렌더링
+        ReactDOM.render(React.createElement(MBTIChemistryChecker), document.getElementById('root'));
+    </script>
+</body>
+</html>
