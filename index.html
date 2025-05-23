@@ -62,27 +62,28 @@
             'ISTP', 'ISFP', 'ESTP', 'ESFP'
         ];
 
-        // 상태 업데이트 함수 (입력 필드 포커스 유지)
+        // 상태 업데이트 함수 (입력 딜레이 적용)
+        let inputTimeout = null;
+        
         function updateState(newState) {
-            const activeElement = document.activeElement;
-            const activeId = activeElement ? activeElement.id : null;
-            const cursorPosition = activeElement && activeElement.selectionStart ? activeElement.selectionStart : null;
+            appState = { ...appState, ...newState };
             
+            // 입력 관련 상태 업데이트는 딜레이를 주어 한글 조합 완료 후 렌더링
+            if (newState.person1 || newState.person2 || newState.searchTerm || newState.adminPassword) {
+                clearTimeout(inputTimeout);
+                inputTimeout = setTimeout(() => {
+                    render();
+                }, 300); // 300ms 후 렌더링
+            } else {
+                // 다른 상태는 즉시 렌더링
+                render();
+            }
+        }
+
+        // 즉시 상태 업데이트 (입력 이외의 경우)
+        function updateStateImmediate(newState) {
             appState = { ...appState, ...newState };
             render();
-            
-            // 포커스 복원
-            if (activeId) {
-                setTimeout(() => {
-                    const element = document.getElementById(activeId);
-                    if (element) {
-                        element.focus();
-                        if (cursorPosition !== null && element.setSelectionRange) {
-                            element.setSelectionRange(cursorPosition, cursorPosition);
-                        }
-                    }
-                }, 0);
-            }
         }
 
         // 로컬 스토리지 함수들
@@ -208,7 +209,7 @@
                 return;
             }
 
-            updateState({ currentStep: 'loading' });
+            updateStateImmediate({ currentStep: 'loading' });
             
             setTimeout(() => {
                 const overallScore = calculateChemistry(appState.person1.mbti, appState.person2.mbti);
@@ -221,18 +222,18 @@
                     detailed: detailedScores
                 };
                 
-                updateState({ result: finalResult, currentStep: 'result' });
+                updateStateImmediate({ result: finalResult, currentStep: 'result' });
                 saveToHistory(finalResult);
                 
                 if (overallScore >= 90) {
-                    updateState({ showCelebration: true });
-                    setTimeout(() => updateState({ showCelebration: false }), 3000);
+                    updateStateImmediate({ showCelebration: true });
+                    setTimeout(() => updateStateImmediate({ showCelebration: false }), 3000);
                 }
             }, 2000);
         }
 
         function resetTest() {
-            updateState({
+            updateStateImmediate({
                 currentStep: 'input',
                 person1: { name: '', mbti: '' },
                 person2: { name: '', mbti: '' },
@@ -257,10 +258,10 @@
         // 관리자 로그인
         function handleAdminLogin() {
             if (appState.adminPassword === 'admin2024' || appState.adminPassword === '교회관리자') {
-                updateState({ isAdmin: true, showAdmin: true, adminPassword: '' });
+                updateStateImmediate({ isAdmin: true, showAdmin: true, adminPassword: '' });
             } else {
                 alert('관리자 비밀번호가 틀렸습니다.');
-                updateState({ adminPassword: '' });
+                updateStateImmediate({ adminPassword: '' });
             }
         }
 
@@ -381,7 +382,7 @@
                                     'onkeypress="if(event.key===\'Enter\')handleAdminLogin()"', 'admin-password')}
                                 ${createButton('로그인', 'handleAdminLogin()', 
                                     'w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-4 px-6 rounded-2xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-200')}
-                                ${createButton('취소', 'updateState({showAdmin: false, adminPassword: ""})', 
+                                ${createButton('취소', 'updateStateImmediate({showAdmin: false, adminPassword: ""})', 
                                     'w-full bg-gray-100 text-gray-700 font-medium py-3 px-6 rounded-2xl hover:bg-gray-200 transition-all')}
                             </div>
                             <div class="mt-6 p-3 bg-blue-50 rounded-xl text-center">
@@ -406,7 +407,7 @@
                                         <span class="text-3xl mr-3">👑</span>
                                         <h1 class="text-3xl font-bold text-gray-800">관리자 대시보드</h1>
                                     </div>
-                                    ${createButton('로그아웃', 'updateState({isAdmin: false, showAdmin: false})', 
+                                    ${createButton('로그아웃', 'updateStateImmediate({isAdmin: false, showAdmin: false})', 
                                         'bg-red-100 text-red-700 px-4 py-2 rounded-xl hover:bg-red-200 transition-all')}
                                 </div>
                                 
@@ -416,7 +417,7 @@
                                         ${createInput('text', '이름 또는 MBTI로 검색...', appState.searchTerm, 
                                             'updateState({searchTerm: this.value})', 'pl-10', 'admin-search')}
                                     </div>
-                                    ${createSelect(appState.dateFilter, 'updateState({dateFilter: this.value})', [
+                                    ${createSelect(appState.dateFilter, 'updateStateImmediate({dateFilter: this.value})', [
                                         {value: 'all', text: '전체 기간'},
                                         {value: 'today', text: '오늘'},
                                         {value: 'week', text: '최근 1주일'},
@@ -545,14 +546,14 @@
                                         <span class="text-2xl mr-2">⚙️</span>
                                         설정
                                     </h2>
-                                    ${createButton('✕', 'updateState({showSettings: false})', 
+                                    ${createButton('✕', 'updateStateImmediate({showSettings: false})', 
                                         'text-gray-500 hover:text-gray-700 text-2xl')}
                                 </div>
                                 
                                 <div class="space-y-4">
                                     <div class="text-center">
                                         <h3 class="font-medium text-gray-700 mb-4">관리자 도구</h3>
-                                        ${createButton('👑 관리자 대시보드', 'updateState({showAdmin: true, showSettings: false})', 
+                                        ${createButton('👑 관리자 대시보드', 'updateStateImmediate({showAdmin: true, showSettings: false})', 
                                             'w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-4 px-6 rounded-2xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-200')}
                                         <p class="text-xs text-gray-500 mt-2">
                                             📊 전체 통계, 데이터 관리, CSV 다운로드
@@ -572,7 +573,7 @@
                                     </div>
                                 </div>
                                 
-                                ${createButton('완료', 'updateState({showSettings: false})', 
+                                ${createButton('완료', 'updateStateImmediate({showSettings: false})', 
                                     'w-full mt-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-3 px-6 rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200')}
                             </div>
                         </div>
@@ -625,7 +626,7 @@
                                     </div>`
                                 }
                                 
-                                ${createButton('돌아가기', 'updateState({showHistory: false})', 
+                                ${createButton('돌아가기', 'updateStateImmediate({showHistory: false})', 
                                     'w-full mt-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-3 px-6 rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200')}
                             </div>
                         </div>
@@ -778,7 +779,7 @@
                                 <div class="space-y-4">
                                     ${createInput('text', '이름을 입력해주세요', appState.person1.name, 
                                         'updateState({person1: {...appState.person1, name: this.value}})', '', 'person1-name')}
-                                    ${createSelect(appState.person1.mbti, 'updateState({person1: {...appState.person1, mbti: this.value}})', 
+                                    ${createSelect(appState.person1.mbti, 'updateStateImmediate({person1: {...appState.person1, mbti: this.value}})', 
                                         [{value: '', text: 'MBTI 유형을 선택해주세요'}, ...mbtiTypes.map(type => ({value: type, text: type}))])}
                                 </div>
                             </div>
@@ -791,7 +792,7 @@
                                 <div class="space-y-4">
                                     ${createInput('text', '이름을 입력해주세요', appState.person2.name, 
                                         'updateState({person2: {...appState.person2, name: this.value}})', '', 'person2-name')}
-                                    ${createSelect(appState.person2.mbti, 'updateState({person2: {...appState.person2, mbti: this.value}})', 
+                                    ${createSelect(appState.person2.mbti, 'updateStateImmediate({person2: {...appState.person2, mbti: this.value}})', 
                                         [{value: '', text: 'MBTI 유형을 선택해주세요'}, ...mbtiTypes.map(type => ({value: type, text: type}))])}
                                 </div>
                             </div>
