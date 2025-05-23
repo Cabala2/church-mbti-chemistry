@@ -718,7 +718,7 @@
                                 ${createButton('공유하기', `
                                     const text = '${appState.person1.name}(${appState.person1.mbti})님과 ${appState.person2.name}(${appState.person2.mbti})님의 케미는 ${appState.result.overall}점! 🔥';
                                     if (navigator.share) {
-                                        navigator.share({title: 'MBTI 케미 체크 결과', text: text});
+                                        navigator.share({title: ' 결과', text: text});
                                     } else {
                                         navigator.clipboard.writeText(text);
                                         alert('결과가 클립보드에 복사되었습니다!');
@@ -738,7 +738,7 @@
                         <div class="text-center mb-8 pt-8">
                             <div class="flex items-center justify-center mb-4">
                                 <span class="text-2xl mr-2">💕</span>
-                                <h1 class="text-xl md:text-3xl font-bold text-gray-800">MBTI 케미 체크</h1>
+                                <h1 class="text-xl md:text-3xl font-bold text-gray-800">순모임 케미 체크</h1>
                                 <div class="flex ml-4 space-x-2">
                                     ${createButton('📋', 'updateState({showHistory: true})', 
                                         'p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-white hover:shadow-md transition-all cursor-pointer')}
