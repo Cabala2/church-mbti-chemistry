@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>교회 MBTI 케미 체크</title>
+    <title>교회 MBTI 케미 체크 v2.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💕</text></svg>">
-    <meta name="description" content="교회 공동체를 위한 MBTI 케미 체크 서비스">
+    <meta name="description" content="교회 공동체를 위한 개선된 MBTI 케미 체크 서비스 v2.0">
     <style>
         .animate-spin {
             animation: spin 1s linear infinite;
@@ -37,11 +37,25 @@
     <div id="root"></div>
 
     <script>
-        // 전역 상태 관리
+        // ==========================================
+        // 🚀 개선된 MBTI 매칭 알고리즘 v2.0 통합
+        // ==========================================
+
+        // 전역 상태 관리 (확장)
         let appState = {
             currentStep: 'input',
-            person1: { name: '', mbti: '' },
-            person2: { name: '', mbti: '' },
+            person1: { 
+                name: '', 
+                mbti: '', 
+                gender: '', 
+                birthDate: '' 
+            },
+            person2: { 
+                name: '', 
+                mbti: '', 
+                gender: '', 
+                birthDate: '' 
+            },
             result: null,
             testHistory: [],
             showHistory: false,
@@ -62,16 +76,326 @@
             'ISTP', 'ISFP', 'ESTP', 'ESFP'
         ];
 
+        const genderOptions = [
+            { value: '', text: '성별을 선택해주세요' },
+            { value: 'male', text: '남성' },
+            { value: 'female', text: '여성' }
+        ];
+
+        // ==========================================
+        // 🎯 개선된 매칭 알고리즘 함수들
+        // ==========================================
+
+        // 나이 계산 함수
+        function calculateAge(birthDate) {
+            if (!birthDate) return 0;
+            const today = new Date();
+            const birth = new Date(birthDate);
+            let age = today.getFullYear() - birth.getFullYear();
+            const monthDiff = today.getMonth() - birth.getMonth();
+            
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+                age--;
+            }
+            return age;
+        }
+
+        // 성별 조합에 따른 보너스 점수
+        function getGenderBonus(gender1, gender2) {
+            if (!gender1 || !gender2) return 0;
+            
+            // 동성 조합
+            if (gender1 === gender2) {
+                return 2; // 순수 우정 관계 안정성 보너스
+            }
+            
+            // 이성 조합 - 약간의 랜덤 요소
+            return Math.random() > 0.5 ? 5 : -2;
+        }
+
+        // 나이 차이에 따른 보너스 점수
+        function getAgeBonus(birthDate1, birthDate2) {
+            if (!birthDate1 || !birthDate2) return 0;
+            
+            const age1 = calculateAge(birthDate1);
+            const age2 = calculateAge(birthDate2);
+            const ageDiff = Math.abs(age1 - age2);
+            
+            if (ageDiff <= 1) {
+                return 8; // 동갑 - 최고의 공감대
+            } else if (ageDiff <= 4) {
+                return 6; // 비슷한 또래 - 형동생 케미
+            } else if (ageDiff <= 9) {
+                return 3; // 적당한 차이 - 서로 배울 점
+            } else if (ageDiff >= 10) {
+                return 5; // 큰 차이 - 멘토링 관계 특별 보너스
+            }
+            return 0;
+        }
+
+        // 성별 조합별 특화 메시지 생성
+        function getGenderSpecificMessage(gender1, gender2, score) {
+            if (!gender1 || !gender2) return "";
+            
+            const isSameGender = gender1 === gender2;
+            
+            if (isSameGender) {
+                // 동성 조합 메시지
+                if (score >= 90) return "💖 평생 갈 진짜 찐친이 될 것 같아요!";
+                if (score >= 80) return "😊 진정한 우정이 시작될 것 같아요!";
+                if (score >= 60) return "🤝 편안한 동성친구 케미네요!";
+                return "👫 시간이 지나면서 더 가까워질 수 있는 관계예요!";
+            } else {
+                // 이성 조합 메시지
+                if (score >= 90) return "💕 운명적인 만남일 수도... 특별한 설렘이 있을 거예요!";
+                if (score >= 80) return "✨ 특별한 설렘이 있을 수도...💕";
+                if (score >= 60) return "😌 좋은 이성친구가 될 수 있어요!";
+                return "🙂 서로를 알아가는 재미가 있는 관계네요!";
+            }
+        }
+
+        // 나이 차이별 관계 특화 메시지
+        function getAgeRelationshipMessage(birthDate1, birthDate2, name1, name2) {
+            if (!birthDate1 || !birthDate2) return "";
+            
+            const age1 = calculateAge(birthDate1);
+            const age2 = calculateAge(birthDate2);
+            const ageDiff = Math.abs(age1 - age2);
+            
+            if (ageDiff <= 1) {
+                return `🎂 동갑 케미! 같은 세대라 공감대가 엄청날 거예요!`;
+            } else if (ageDiff <= 4) {
+                return `👫 ${ageDiff}살 차이! 편안한 형동생 관계가 될 것 같아요!`;
+            } else if (ageDiff <= 9) {
+                return `🌟 ${ageDiff}살 차이! 서로 다른 관점을 배울 수 있는 관계네요!`;
+            } else {
+                const olderName = age1 > age2 ? name1 : name2;
+                const youngerName = age1 > age2 ? name2 : name1;
+                return `👨‍🏫 ${ageDiff}살 차이! ${olderName}님이 ${youngerName}님의 좋은 멘토가 될 수 있을 거예요!`;
+            }
+        }
+
+        // 기존 MBTI 계산 로직 (개선된 버전)
+        function calculateChemistry(mbti1, mbti2, person1Name = '', person2Name = '') {
+            // 기본 호환성 점수
+            const baseCompatibility = {
+                'ENFP-INFJ': 90, 'INFJ-ENFP': 90,
+                'ESFJ-ISFP': 85, 'ISFP-ESFJ': 85,
+                'ENTJ-INTP': 82, 'INTP-ENTJ': 82,
+                'ESTJ-ISFJ': 80, 'ISFJ-ESTJ': 80,
+                'ENFJ-INFP': 78, 'INFP-ENFJ': 78,
+                'ESTP-ISFJ': 75, 'ISFJ-ESTP': 75,
+                'ISTJ-ESFP': 70, 'ESFP-ISTJ': 70,
+                'ISTP-ENTJ': 68, 'ENTJ-ISTP': 68,
+                'ENTP-ISFJ': 65, 'ISFJ-ENTP': 65,
+                'INTJ-ESFP': 45, 'ESFP-INTJ': 45,
+                'INTP-ESFJ': 48, 'ESFJ-INTP': 48,
+                'ISFP-ESTJ': 50, 'ESTJ-ISFP': 50,
+            };
+
+            // 이름 기반 시드값 생성 (일관성 유지)
+            function getNameSeed(name1, name2) {
+                const combined = (name1 + name2).split('').reduce((acc, char) => {
+                    return acc + char.charCodeAt(0);
+                }, 0);
+                return combined % 1000;
+            }
+
+            // 유사 랜덤 함수 (시드 기반)
+            function seededRandom(seed, min, max) {
+                const x = Math.sin(seed) * 10000;
+                const random = x - Math.floor(x);
+                return Math.floor(random * (max - min + 1)) + min;
+            }
+
+            const nameSeed = getNameSeed(person1Name, person2Name);
+            
+            // 기본 점수 계산
+            let baseScore = 60; // 기본 점수
+            const key = mbti1 + '-' + mbti2;
+            
+            if (mbti1 === mbti2) {
+                // 같은 MBTI일 때도 다양성 추가
+                baseScore = seededRandom(nameSeed, 75, 95);
+            } else if (baseCompatibility[key]) {
+                baseScore = baseCompatibility[key];
+            } else {
+                // 개별 차원별 호환성 계산
+                let compatibilityScore = 50;
+                
+                // E/I 호환성 (외향/내향)
+                if ((mbti1[0] === 'E' && mbti2[0] === 'I') || (mbti1[0] === 'I' && mbti2[0] === 'E')) {
+                    compatibilityScore += 15; // 상호 보완
+                } else if (mbti1[0] === mbti2[0]) {
+                    compatibilityScore += 8; // 같은 에너지 방향
+                }
+                
+                // S/N 호환성 (감각/직관)
+                if (mbti1[1] === mbti2[1]) {
+                    compatibilityScore += 12; // 같은 정보 처리 방식
+                } else {
+                    compatibilityScore += 5; // 다른 관점 제공
+                }
+                
+                // T/F 호환성 (사고/감정)
+                if ((mbti1[2] === 'T' && mbti2[2] === 'F') || (mbti1[2] === 'F' && mbti2[2] === 'T')) {
+                    compatibilityScore += 10; // 상호 보완
+                } else {
+                    compatibilityScore += 7; // 같은 결정 방식
+                }
+                
+                // J/P 호환성 (판단/인식)
+                if ((mbti1[3] === 'J' && mbti2[3] === 'P') || (mbti1[3] === 'P' && mbti2[3] === 'J')) {
+                    compatibilityScore += 13; // 상호 보완
+                } else {
+                    compatibilityScore += 6; // 같은 생활 방식
+                }
+                
+                baseScore = compatibilityScore;
+            }
+            
+            // 개인차 변동 요소 (±15점 범위)
+            const personalVariation = seededRandom(nameSeed + 100, -15, 15);
+            
+            // 특별한 조합 보너스/패널티
+            const specialBonus = getSpecialBonus(mbti1, mbti2, nameSeed);
+            
+            // 최종 점수 계산
+            let finalScore = baseScore + personalVariation + specialBonus;
+            
+            // 점수 범위 제한 (25-100)
+            finalScore = Math.max(25, Math.min(100, finalScore));
+            
+            return finalScore;
+        }
+
+        // 특별한 조합 보너스/패널티
+        function getSpecialBonus(mbti1, mbti2, seed) {
+            function seededRandom(seed, min, max) {
+                const x = Math.sin(seed) * 10000;
+                const random = x - Math.floor(x);
+                return Math.floor(random * (max - min + 1)) + min;
+            }
+            
+            const special = seededRandom(seed + 200, 1, 100);
+            
+            // 특별한 케미 (5% 확률로 +20점)
+            if (special <= 5) return 20;
+            
+            // 좋은 케미 (15% 확률로 +10점)  
+            if (special <= 20) return 10;
+            
+            // 나쁜 케미 (10% 확률로 -10점)
+            if (special >= 90) return -10;
+            
+            // 특별한 갈등 (3% 확률로 -15점)
+            if (special >= 97) return -15;
+            
+            return 0; // 보통 (67% 확률)
+        }
+
+        // 개선된 메인 매칭 함수
+        function calculateAdvancedChemistry(mbti1, mbti2, name1 = '', name2 = '', gender1 = '', gender2 = '', birthDate1 = '', birthDate2 = '') {
+            // 1단계: 기존 기본 MBTI 호환성 점수
+            let baseScore = calculateChemistry(mbti1, mbti2, name1, name2);
+            
+            // 2단계: 성별 조합 보정
+            if (gender1 && gender2) {
+                const genderBonus = getGenderBonus(gender1, gender2);
+                baseScore += genderBonus;
+            }
+            
+            // 3단계: 나이 차이 보정
+            if (birthDate1 && birthDate2) {
+                const ageBonus = getAgeBonus(birthDate1, birthDate2);
+                baseScore += ageBonus;
+            }
+            
+            // 점수 범위 제한 (25-100)
+            return Math.max(25, Math.min(100, baseScore));
+        }
+
+        // 개선된 상세 점수 계산
+        function getAdvancedDetailedScores(mbti1, mbti2, name1 = '', name2 = '', gender1 = '', gender2 = '', birthDate1 = '', birthDate2 = '') {
+            const baseDetailedScores = getDetailedScores(mbti1, mbti2, name1, name2);
+            const genderBonus = gender1 && gender2 ? getGenderBonus(gender1, gender2) : 0;
+            const ageBonus = birthDate1 && birthDate2 ? getAgeBonus(birthDate1, birthDate2) : 0;
+            
+            // 영역별로 다른 가중치 적용
+            return {
+                travel: Math.max(20, Math.min(100, baseDetailedScores.travel + genderBonus * 0.8 + ageBonus * 0.6)),
+                faith: Math.max(20, Math.min(100, baseDetailedScores.faith + ageBonus * 1.2)), // 나이 차이가 신앙에 더 영향
+                conversation: Math.max(20, Math.min(100, baseDetailedScores.conversation + genderBonus * 1.2 + ageBonus * 0.8)),
+                teamwork: Math.max(20, Math.min(100, baseDetailedScores.teamwork + ageBonus * 1.0)),
+                service: Math.max(20, Math.min(100, baseDetailedScores.service + genderBonus * 0.6 + ageBonus * 1.0))
+            };
+        }
+
+        function getDetailedScores(mbti1, mbti2, person1Name = '', person2Name = '') {
+            const baseScore = calculateChemistry(mbti1, mbti2, person1Name, person2Name);
+            const nameSeed = (person1Name + person2Name).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            
+            // 유사 랜덤 함수
+            function seededRandom(seed, min, max) {
+                const x = Math.sin(seed) * 10000;
+                const random = x - Math.floor(x);
+                return Math.floor(random * (max - min + 1)) + min;
+            }
+            
+            return {
+                travel: Math.max(20, Math.min(100, baseScore + seededRandom(nameSeed + 1, -20, 20))),
+                faith: Math.max(20, Math.min(100, baseScore + seededRandom(nameSeed + 2, -15, 15))),
+                conversation: Math.max(20, Math.min(100, baseScore + seededRandom(nameSeed + 3, -25, 25))),
+                teamwork: Math.max(20, Math.min(100, baseScore + seededRandom(nameSeed + 4, -18, 18))),
+                service: Math.max(20, Math.min(100, baseScore + seededRandom(nameSeed + 5, -15, 15)))
+            };
+        }
+
+        // 종합 케미 메시지 생성 (개선된 버전)
+        function getAdvancedChemistryMessage(mbti1, mbti2, score, gender1 = '', gender2 = '', birthDate1 = '', birthDate2 = '', name1 = '', name2 = '') {
+            let message = getChemistryMessage(mbti1, mbti2, score);
+            
+            // 성별 특화 메시지 추가
+            if (gender1 && gender2) {
+                const genderMessage = getGenderSpecificMessage(gender1, gender2, score);
+                if (genderMessage) {
+                    message += ` ${genderMessage}`;
+                }
+            }
+            
+            // 나이 관계 메시지 추가
+            if (birthDate1 && birthDate2 && name1 && name2) {
+                const ageMessage = getAgeRelationshipMessage(birthDate1, birthDate2, name1, name2);
+                if (ageMessage) {
+                    message += ` ${ageMessage}`;
+                }
+            }
+            
+            return message;
+        }
+
+        function getChemistryMessage(mbti1, mbti2, score) {
+            if (mbti1 === mbti2) {
+                return "찐친 될 확률 99%! 같은 MBTI끼리는 서로를 너무 잘 이해해서 금세 편안한 사이가 될 것 같아요!";
+            }
+
+            if (score >= 80) return "와! 정말 환상의 케미네요! 함께하면 시너지 폭발할 것 같아요!";
+            if (score >= 60) return "좋은 케미에요! 더 알아갈수록 케미가 업될 거예요!";
+            return "케미를 맞춰가는 재미가 있는 관계네요!";
+        }
+
+        // ==========================================
+        // 🔧 기존 앱 로직 (상태 관리, UI 등)
+        // ==========================================
+
         // 상태 업데이트 함수 (입력 필드는 렌더링 스킵)
         function updateState(newState) {
             appState = { ...appState, ...newState };
             
             // 입력 관련 상태는 실제 DOM 업데이트만 하고 전체 렌더링은 하지 않음
             if (newState.person1 || newState.person2 || newState.searchTerm || newState.adminPassword) {
-                // 입력 필드만 업데이트하고 렌더링은 하지 않음
                 return;
             } else {
-                // 다른 상태는 즉시 렌더링
                 render();
             }
         }
@@ -89,34 +413,7 @@
             updateState({ testHistory: savedHistory, googleSheetsUrl: savedUrl });
         }
 
-        // Google Sheets 저장
-        async function saveToGoogleSheets(data) {
-            if (!appState.googleSheetsUrl) return false;
-            
-            try {
-                await fetch(appState.googleSheetsUrl, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        person1_name: data.person1.name,
-                        person1_mbti: data.person1.mbti,
-                        person2_name: data.person2.name,
-                        person2_mbti: data.person2.mbti,
-                        score: data.score,
-                        date: data.date,
-                        time: data.time,
-                        timestamp: new Date().toISOString()
-                    })
-                });
-                return true;
-            } catch (error) {
-                console.log('Google Sheets 저장 실패:', error);
-                return false;
-            }
-        }
-
-        // 기록 저장
+        // 기록 저장 (확장된 정보 포함)
         async function saveToHistory(result) {
             const newRecord = {
                 id: Date.now(),
@@ -124,7 +421,12 @@
                 person2: appState.person2,
                 score: result.overall,
                 date: new Date().toLocaleDateString('ko-KR'),
-                time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
+                time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+                // v2.0 추가 정보
+                genderCombo: appState.person1.gender && appState.person2.gender ? 
+                    `${appState.person1.gender}-${appState.person2.gender}` : '',
+                ageDiff: appState.person1.birthDate && appState.person2.birthDate ? 
+                    Math.abs(calculateAge(appState.person1.birthDate) - calculateAge(appState.person2.birthDate)) : null
             };
             
             const updatedHistory = [newRecord, ...appState.testHistory].slice(0, 50);
@@ -135,82 +437,51 @@
         // 이름 마스킹 함수 (관리자가 아닌 경우)
         function maskName(name) {
             if (appState.isAdmin) {
-                return name; // 관리자는 전체 이름 표시
+                return name;
             }
             
             if (name.length === 1) {
-                return name; // 한 글자는 그대로
+                return name;
             } else if (name.length === 2) {
-                return name[0] + '*'; // 두 글자: 첫 글자 + *
+                return name[0] + '*';
             } else {
-                return name[0] + '*'.repeat(name.length - 1); // 세 글자 이상: 첫 글자 + ***
+                return name[0] + '*'.repeat(name.length - 1);
             }
-        }
-
-        // MBTI 계산 로직
-        function calculateChemistry(mbti1, mbti2) {
-            const compatibility = {
-                'ENFP-INFJ': 95, 'INFJ-ENFP': 95,
-                'ESFJ-ISFP': 90, 'ISFP-ESFJ': 90,
-                'ENTJ-INTP': 88, 'INTP-ENTJ': 88,
-                'ESTJ-ISFJ': 87, 'ISFJ-ESTJ': 87,
-                'ENFJ-ESTP': 75, 'ESTP-ENFJ': 75,
-                'INFP-ENFJ': 78, 'ENFJ-INFP': 78,
-                'ISTJ-ESFP': 72, 'ESFP-ISTJ': 72,
-                'ISTP-ENTJ': 74, 'ENTJ-ISTP': 74,
-                'INTJ-ESFP': 45, 'ESFP-INTJ': 45,
-                'INTP-ESFJ': 48, 'ESFJ-INTP': 48,
-                'ISFP-ESTJ': 50, 'ESTJ-ISFP': 50,
-                'ENTP-ISFJ': 52, 'ISFJ-ENTP': 52,
-            };
-
-            const key = mbti1 + '-' + mbti2;
-            if (mbti1 === mbti2) return 85;
-            if (compatibility[key]) return compatibility[key];
-            
-            let score = 50;
-            if ((mbti1[0] === 'E' && mbti2[0] === 'I') || (mbti1[0] === 'I' && mbti2[0] === 'E')) score += 15;
-            if (mbti1[1] === mbti2[1]) score += 10;
-            if (mbti1[2] === mbti2[2]) score += 5;
-            if (mbti1[3] === mbti2[3]) score += 10;
-            
-            return Math.min(score, 95);
-        }
-
-        function getDetailedScores(mbti1, mbti2) {
-            const baseScore = calculateChemistry(mbti1, mbti2);
-            return {
-                travel: Math.min(baseScore + Math.floor(Math.random() * 20) - 10, 100),
-                faith: Math.min(baseScore + Math.floor(Math.random() * 15) - 7, 100),
-                conversation: Math.min(baseScore + Math.floor(Math.random() * 25) - 12, 100),
-                teamwork: Math.min(baseScore + Math.floor(Math.random() * 20) - 10, 100),
-                service: Math.min(baseScore + Math.floor(Math.random() * 15) - 7, 100)
-            };
-        }
-
-        function getChemistryMessage(mbti1, mbti2, score) {
-            if (mbti1 === mbti2) {
-                return "찐친 될 확률 99%! 같은 MBTI끼리는 서로를 너무 잘 이해해서 금세 편안한 사이가 될 것 같아요!";
-            }
-
-            if (score >= 80) return "와! 정말 환상의 케미네요! 함께하면 시너지 폭발할 것 같아요!";
-            if (score >= 60) return "좋은 케미에요! 더 알아갈수록 케미가 업될 거예요!";
-            return "케미를 맞춰가는 재미가 있는 관계네요!";
         }
 
         // 이벤트 핸들러들
         function handleSubmit() {
             if (!appState.person1.name || !appState.person1.mbti || !appState.person2.name || !appState.person2.mbti) {
-                alert('모든 정보를 입력해주세요!');
+                alert('이름과 MBTI는 필수 입력 사항입니다!');
                 return;
             }
 
             updateStateImmediate({ currentStep: 'loading' });
             
             setTimeout(() => {
-                const overallScore = calculateChemistry(appState.person1.mbti, appState.person2.mbti);
-                const message = getChemistryMessage(appState.person1.mbti, appState.person2.mbti, overallScore);
-                const detailedScores = getDetailedScores(appState.person1.mbti, appState.person2.mbti);
+                // 개선된 케미 계산 사용
+                const overallScore = calculateAdvancedChemistry(
+                    appState.person1.mbti, appState.person2.mbti,
+                    appState.person1.name, appState.person2.name,
+                    appState.person1.gender, appState.person2.gender,
+                    appState.person1.birthDate, appState.person2.birthDate
+                );
+                
+                // 개선된 메시지 생성
+                const message = getAdvancedChemistryMessage(
+                    appState.person1.mbti, appState.person2.mbti, overallScore,
+                    appState.person1.gender, appState.person2.gender,
+                    appState.person1.birthDate, appState.person2.birthDate,
+                    appState.person1.name, appState.person2.name
+                );
+                
+                // 개선된 상세 점수 계산
+                const detailedScores = getAdvancedDetailedScores(
+                    appState.person1.mbti, appState.person2.mbti,
+                    appState.person1.name, appState.person2.name,
+                    appState.person1.gender, appState.person2.gender,
+                    appState.person1.birthDate, appState.person2.birthDate
+                );
                 
                 const finalResult = {
                     overall: overallScore,
@@ -231,8 +502,8 @@
         function resetTest() {
             updateStateImmediate({
                 currentStep: 'input',
-                person1: { name: '', mbti: '' },
-                person2: { name: '', mbti: '' },
+                person1: { name: '', mbti: '', gender: '', birthDate: '' },
+                person2: { name: '', mbti: '', gender: '', birthDate: '' },
                 result: null,
                 showCelebration: false
             });
@@ -261,17 +532,20 @@
             }
         }
 
-        // CSV 다운로드
+        // CSV 다운로드 (확장된 정보 포함)
         function downloadCSV() {
             if (appState.testHistory.length === 0) {
                 alert('다운로드할 데이터가 없습니다.');
                 return;
             }
 
-            const headers = ['날짜', '시간', '첫번째 이름', '첫번째 MBTI', '두번째 이름', '두번째 MBTI', '케미 점수'];
+            const headers = ['날짜', '시간', '첫번째 이름', '첫번째 MBTI', '첫번째 성별', '첫번째 생년월일', 
+                           '두번째 이름', '두번째 MBTI', '두번째 성별', '두번째 생년월일', '케미 점수', '나이차이'];
             const csvData = appState.testHistory.map(record => [
-                record.date, record.time, record.person1.name, record.person1.mbti,
-                record.person2.name, record.person2.mbti, record.score
+                record.date, record.time, 
+                record.person1.name, record.person1.mbti, record.person1.gender || '', record.person1.birthDate || '',
+                record.person2.name, record.person2.mbti, record.person2.gender || '', record.person2.birthDate || '',
+                record.score, record.ageDiff || ''
             ]);
 
             const csvContent = [headers, ...csvData]
@@ -282,14 +556,14 @@
             const link = document.createElement('a');
             const url = URL.createObjectURL(blob);
             link.setAttribute('href', url);
-            link.setAttribute('download', `MBTI_케미테스트_기록_${new Date().toLocaleDateString('ko-KR')}.csv`);
+            link.setAttribute('download', `MBTI_케미테스트_v2.0_${new Date().toLocaleDateString('ko-KR')}.csv`);
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         }
 
-        // 통계 계산
+        // 통계 계산 (확장된 정보 포함)
         function getStats() {
             if (appState.testHistory.length === 0) {
                 return {
@@ -298,7 +572,9 @@
                     topMBTI: '',
                     topCombo: '',
                     todayTests: 0,
-                    weekTests: 0
+                    weekTests: 0,
+                    genderStats: {},
+                    averageAgeDiff: 0
                 };
             }
 
@@ -315,12 +591,26 @@
             const totalScore = appState.testHistory.reduce((sum, record) => sum + record.score, 0);
             const mbtiCount = {};
             const comboCount = {};
+            const genderStats = {};
+            let totalAgeDiff = 0;
+            let ageDiffCount = 0;
 
             appState.testHistory.forEach(record => {
                 mbtiCount[record.person1.mbti] = (mbtiCount[record.person1.mbti] || 0) + 1;
                 mbtiCount[record.person2.mbti] = (mbtiCount[record.person2.mbti] || 0) + 1;
                 const combo = [record.person1.mbti, record.person2.mbti].sort().join('-');
                 comboCount[combo] = (comboCount[combo] || 0) + 1;
+                
+                // 성별 통계
+                if (record.genderCombo) {
+                    genderStats[record.genderCombo] = (genderStats[record.genderCombo] || 0) + 1;
+                }
+                
+                // 나이 차이 통계
+                if (record.ageDiff !== null && record.ageDiff !== undefined) {
+                    totalAgeDiff += record.ageDiff;
+                    ageDiffCount++;
+                }
             });
 
             const topMBTI = Object.keys(mbtiCount).reduce((a, b) => mbtiCount[a] > mbtiCount[b] ? a : b, '');
@@ -332,7 +622,9 @@
                 topMBTI: topMBTI,
                 topCombo: topCombo,
                 todayTests: todayTests,
-                weekTests: weekTests
+                weekTests: weekTests,
+                genderStats: genderStats,
+                averageAgeDiff: ageDiffCount > 0 ? Math.round(totalAgeDiff / ageDiffCount) : 0
             };
         }
 
@@ -359,11 +651,14 @@
             return `<button onclick="${onclick}" class="${className}">${text}</button>`;
         }
 
-        // 메인 렌더링 함수
+        // ==========================================
+        // 🎨 메인 렌더링 함수 (UI 확장)
+        // ==========================================
+
         function render() {
             const root = document.getElementById('root');
             
-            // 관리자 로그인 화면
+            // 관리자 로그인 화면 (기존과 동일)
             if (appState.showAdmin && !appState.isAdmin) {
                 root.innerHTML = `
                     <div class="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-50 flex items-center justify-center p-4">
@@ -391,7 +686,7 @@
                 return;
             }
 
-            // 관리자 대시보드
+            // 관리자 대시보드 (확장된 통계 포함)
             if (appState.showAdmin && appState.isAdmin) {
                 const stats = getStats();
                 
@@ -402,7 +697,8 @@
                                 <div class="flex items-center justify-between mb-6">
                                     <div class="flex items-center">
                                         <span class="text-3xl mr-3">👑</span>
-                                        <h1 class="text-3xl font-bold text-gray-800">관리자 대시보드</h1>
+                                        <h1 class="text-3xl font-bold text-gray-800">관리자 대시보드 v2.0</h1>
+                                        <span class="ml-3 px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full font-medium">성별&나이 업그레이드</span>
                                     </div>
                                     ${createButton('로그아웃', 'updateStateImmediate({isAdmin: false, showAdmin: false})', 
                                         'bg-red-100 text-red-700 px-4 py-2 rounded-xl hover:bg-red-200 transition-all')}
@@ -423,7 +719,7 @@
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                                 <div class="bg-white rounded-2xl shadow-lg p-6">
                                     <div class="flex items-center justify-between mb-4">
                                         <h3 class="font-semibold text-gray-700">총 테스트 수</h3>
@@ -440,6 +736,39 @@
                                     </div>
                                     <div class="text-3xl font-bold text-green-600">${stats.averageScore}점</div>
                                     <p class="text-sm text-gray-500 mt-2">전체 테스트 평균</p>
+                                </div>
+
+                                <div class="bg-white rounded-2xl shadow-lg p-6">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <h3 class="font-semibold text-gray-700">평균 나이 차이</h3>
+                                        <span class="text-2xl">🎂</span>
+                                    </div>
+                                    <div class="text-3xl font-bold text-purple-600">${stats.averageAgeDiff}살</div>
+                                    <p class="text-sm text-gray-500 mt-2">테스트 참여자 평균 나이 차이</p>
+                                </div>
+
+                                <div class="bg-white rounded-2xl shadow-lg p-6">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <h3 class="font-semibold text-gray-700">인기 조합</h3>
+                                        <span class="text-2xl">💕</span>
+                                    </div>
+                                    <div class="text-xl font-bold text-red-600">${stats.topCombo || '-'}</div>
+                                    <p class="text-sm text-gray-500 mt-2">가장 많이 테스트된 MBTI 조합</p>
+                                </div>
+
+                                <div class="bg-white rounded-2xl shadow-lg p-6">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <h3 class="font-semibold text-gray-700">성별 조합 통계</h3>
+                                        <span class="text-2xl">👫</span>
+                                    </div>
+                                    <div class="text-sm text-gray-600">
+                                        ${Object.entries(stats.genderStats).map(([combo, count]) => {
+                                            const display = combo === 'male-female' || combo === 'female-male' ? '이성' :
+                                                          combo === 'male-male' ? '남성' :
+                                                          combo === 'female-female' ? '여성' : combo;
+                                            return `<div class="flex justify-between"><span>${display}:</span><span class="font-medium">${count}회</span></div>`;
+                                        }).join('') || '<div class="text-gray-400">데이터 없음</div>'}
+                                    </div>
                                 </div>
 
                                 <div class="bg-white rounded-2xl shadow-lg p-6">
@@ -462,15 +791,6 @@
 
                                 <div class="bg-white rounded-2xl shadow-lg p-6">
                                     <div class="flex items-center justify-between mb-4">
-                                        <h3 class="font-semibold text-gray-700">인기 조합</h3>
-                                        <span class="text-2xl">💕</span>
-                                    </div>
-                                    <div class="text-xl font-bold text-red-600">${stats.topCombo || '-'}</div>
-                                    <p class="text-sm text-gray-500 mt-2">가장 많이 테스트된 조합</p>
-                                </div>
-
-                                <div class="bg-white rounded-2xl shadow-lg p-6">
-                                    <div class="flex items-center justify-between mb-4">
                                         <h3 class="font-semibold text-gray-700">이번 주 테스트</h3>
                                         <span class="text-2xl">📊</span>
                                     </div>
@@ -481,7 +801,7 @@
 
                             <div class="bg-white rounded-3xl shadow-xl p-6">
                                 <div class="flex items-center justify-between mb-6">
-                                    <h2 class="text-2xl font-bold text-gray-800">상세 기록</h2>
+                                    <h2 class="text-2xl font-bold text-gray-800">상세 기록 (v2.0 확장)</h2>
                                     <div class="text-sm text-gray-500">총 ${appState.testHistory.length}개 기록</div>
                                 </div>
                                 
@@ -496,10 +816,19 @@
                                                     <th class="text-left py-3 px-4 font-semibold text-gray-700">첫 번째</th>
                                                     <th class="text-left py-3 px-4 font-semibold text-gray-700">두 번째</th>
                                                     <th class="text-center py-3 px-4 font-semibold text-gray-700">케미 점수</th>
+                                                    <th class="text-center py-3 px-4 font-semibold text-gray-700">성별 조합</th>
+                                                    <th class="text-center py-3 px-4 font-semibold text-gray-700">나이 차이</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                ${appState.testHistory.map((record, index) => `
+                                                ${appState.testHistory.map((record, index) => {
+                                                    const genderDisplay = record.genderCombo ? 
+                                                        (record.genderCombo === 'male-female' || record.genderCombo === 'female-male' ? '이성' :
+                                                         record.genderCombo === 'male-male' ? '남성' : '여성') : '-';
+                                                    const ageDiffDisplay = record.ageDiff !== null && record.ageDiff !== undefined ? 
+                                                        `${record.ageDiff}살` : '-';
+                                                    
+                                                    return `
                                                     <tr class="${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}">
                                                         <td class="py-3 px-4">${record.date}</td>
                                                         <td class="py-3 px-4">${record.time}</td>
@@ -508,15 +837,17 @@
                                                         <td class="py-3 px-4 text-center">
                                                             <span class="font-bold ${getScoreColor(record.score)}">${record.score}점 ${getScoreEmoji(record.score)}</span>
                                                         </td>
+                                                        <td class="py-3 px-4 text-center">${genderDisplay}</td>
+                                                        <td class="py-3 px-4 text-center">${ageDiffDisplay}</td>
                                                     </tr>
-                                                `).join('')}
+                                                `;}).join('')}
                                             </tbody>
                                         </table>
                                         
                                         <div class="mt-6 pt-6 border-t border-gray-200">
                                             <h3 class="font-medium text-gray-700 mb-3">관리자 도구</h3>
                                             <div class="flex space-x-3">
-                                                ${createButton('📥 CSV 다운로드', 'downloadCSV()', 
+                                                ${createButton('📥 CSV 다운로드 (확장)', 'downloadCSV()', 
                                                     'flex-1 bg-green-100 text-green-700 font-medium py-3 px-4 rounded-2xl hover:bg-green-200 transition-all')}
                                                 ${createButton('🗑️ 모든 기록 삭제', 
                                                     'if(confirm("정말로 모든 기록을 삭제하시겠습니까?")) { localStorage.removeItem("mbtiChemistryHistory"); updateState({testHistory: []}); alert("모든 기록이 삭제되었습니다."); }', 
@@ -532,7 +863,7 @@
                 return;
             }
 
-            // 설정 화면
+            // 설정 화면 (업데이트된 버전)
             if (appState.showSettings) {
                 root.innerHTML = `
                     <div class="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4">
@@ -553,18 +884,20 @@
                                         ${createButton('👑 관리자 대시보드', 'updateStateImmediate({showAdmin: true, showSettings: false})', 
                                             'w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-4 px-6 rounded-2xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-200')}
                                         <p class="text-xs text-gray-500 mt-2">
-                                            📊 전체 통계, 데이터 관리, CSV 다운로드
+                                            📊 전체 통계, 성별&나이 분석, CSV 다운로드
                                         </p>
                                     </div>
                                     
                                     <div class="border-t pt-4">
                                         <h3 class="font-medium text-gray-700 mb-3">앱 정보</h3>
                                         <div class="bg-blue-50 rounded-xl p-4 text-center">
-                                            <p class="text-sm text-blue-800 font-medium mb-2">🏛️ 교회 MBTI 케미 체크</p>
+                                            <p class="text-sm text-blue-800 font-medium mb-2">🏛️ 교회 MBTI 케미 체크 v2.0</p>
                                             <p class="text-xs text-blue-600">
-                                                • 5개 영역별 세부 분석<br>
-                                                • 개인정보 보호 (이름 마스킹)<br>
-                                                • 관리자용 통계 대시보드
+                                                ✨ 새로운 기능<br>
+                                                • 성별 조합별 특화 메시지<br>
+                                                • 나이 차이 기반 관계 분석<br>
+                                                • 확장된 통계 대시보드<br>
+                                                • 개인화된 케미 계산
                                             </p>
                                         </div>
                                     </div>
@@ -579,7 +912,7 @@
                 return;
             }
 
-            // 기록 보기 화면
+            // 기록 보기 화면 (확장된 정보 표시)
             if (appState.showHistory) {
                 root.innerHTML = `
                     <div class="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4">
@@ -588,7 +921,7 @@
                                 <div class="flex items-center justify-between mb-6">
                                     <h2 class="text-xl font-bold text-gray-800 flex items-center">
                                         <span class="text-2xl mr-2">📋</span>
-                                        케미 테스트 기록
+                                        케미 테스트 기록 v2.0
                                     </h2>
                                     <div class="flex space-x-2">
                                         ${createButton('⚙️', 'updateState({showSettings: true})', 
@@ -601,7 +934,20 @@
                                 ${appState.testHistory.length === 0 ? 
                                     '<div class="text-center py-8"><p class="text-gray-500">아직 테스트 기록이 없어요</p></div>' :
                                     `<div class="space-y-3 max-h-96 overflow-y-auto">
-                                        ${appState.testHistory.map(record => `
+                                        ${appState.testHistory.map(record => {
+                                            const genderInfo = record.genderCombo ? 
+                                                `<span class="text-xs px-2 py-1 rounded-full ${
+                                                    record.genderCombo === 'male-female' || record.genderCombo === 'female-male' ? 
+                                                    'bg-pink-100 text-pink-600' : 'bg-blue-100 text-blue-600'
+                                                }">${
+                                                    record.genderCombo === 'male-female' || record.genderCombo === 'female-male' ? '이성' :
+                                                    record.genderCombo === 'male-male' ? '남성' : '여성'
+                                                }</span>` : '';
+                                            
+                                            const ageInfo = record.ageDiff !== null && record.ageDiff !== undefined ? 
+                                                `<span class="text-xs px-2 py-1 rounded-full bg-green-100 text-green-600">${record.ageDiff}살차이</span>` : '';
+                                            
+                                            return `
                                             <div class="bg-gray-50 rounded-2xl p-4">
                                                 <div class="flex items-center justify-between mb-2">
                                                     <div class="flex items-center space-x-2">
@@ -615,11 +961,17 @@
                                                         ${record.score}점 ${getScoreEmoji(record.score)}
                                                     </span>
                                                 </div>
-                                                <div class="text-xs text-gray-500">
-                                                    ${record.date} ${record.time}
+                                                <div class="flex items-center justify-between">
+                                                    <div class="text-xs text-gray-500">
+                                                        ${record.date} ${record.time}
+                                                    </div>
+                                                    <div class="flex space-x-1">
+                                                        ${genderInfo}
+                                                        ${ageInfo}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        `).join('')}
+                                        `;}).join('')}
                                     </div>`
                                 }
                                 
@@ -632,22 +984,25 @@
                 return;
             }
 
-            // 로딩 화면
+            // 로딩 화면 (기존과 동일)
             if (appState.currentStep === 'loading') {
                 root.innerHTML = `
                     <div class="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
                         <div class="bg-white rounded-3xl shadow-xl p-8 max-w-md w-full text-center">
                             <div class="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mx-auto mb-6"></div>
                             <h2 class="text-xl font-bold text-gray-800 mb-2">케미 분석 중...</h2>
-                            <p class="text-gray-600">두 분의 특별한 케미를 확인하고 있어요!</p>
+                            <p class="text-gray-600">성별과 나이까지 고려한 정밀 분석을 진행하고 있어요!</p>
                         </div>
                     </div>
                 `;
                 return;
             }
 
-            // 결과 화면
+            // 결과 화면 (확장된 정보 표시)
             if (appState.currentStep === 'result') {
+                const hasGenderInfo = appState.person1.gender && appState.person2.gender;
+                const hasAgeInfo = appState.person1.birthDate && appState.person2.birthDate;
+                
                 root.innerHTML = `
                     <div class="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4">
                         ${appState.showCelebration ? `
@@ -669,7 +1024,7 @@
                                 <div class="text-center mb-6">
                                     <div class="flex items-center justify-center mb-4">
                                         <span class="text-3xl mr-2">✨</span>
-                                        <h1 class="text-2xl font-bold text-gray-800">케미 분석 결과</h1>
+                                        <h1 class="text-2xl font-bold text-gray-800">케미 분석 결과 v2.0</h1>
                                         ${createButton('📋', 'updateStateImmediate({showHistory: true})', 
                                             'ml-4 p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100')}
                                     </div>
@@ -680,6 +1035,24 @@
                                         <span class="text-lg font-semibold text-blue-600">${appState.person2.name}</span>
                                         <span class="text-sm text-gray-500">(${appState.person2.mbti})</span>
                                     </div>
+                                    
+                                    ${hasGenderInfo || hasAgeInfo ? `
+                                        <div class="flex justify-center space-x-2 mb-4">
+                                            ${hasGenderInfo ? `
+                                                <span class="text-xs px-3 py-1 rounded-full ${
+                                                    appState.person1.gender !== appState.person2.gender ? 
+                                                    'bg-pink-100 text-pink-600' : 'bg-blue-100 text-blue-600'
+                                                }">
+                                                    ${appState.person1.gender !== appState.person2.gender ? '이성 조합' : '동성 조합'}
+                                                </span>
+                                            ` : ''}
+                                            ${hasAgeInfo ? `
+                                                <span class="text-xs px-3 py-1 bg-green-100 text-green-600 rounded-full">
+                                                    ${Math.abs(calculateAge(appState.person1.birthDate) - calculateAge(appState.person2.birthDate))}살 차이
+                                                </span>
+                                            ` : ''}
+                                        </div>
+                                    ` : ''}
                                 </div>
                                 
                                 <div class="text-center mb-6">
@@ -732,9 +1105,11 @@
                                 ${createButton('다시 테스트하기', 'resetTest()', 
                                     'flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-3 px-6 rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg')}
                                 ${createButton('공유하기', `
-                                    const text = '${appState.person1.name}(${appState.person1.mbti})님과 ${appState.person2.name}(${appState.person2.mbti})님의 케미는 ${appState.result.overall}점! 🔥';
+                                    const genderInfo = '${hasGenderInfo ? (appState.person1.gender !== appState.person2.gender ? ' (이성조합)' : ' (동성조합)') : ''}';
+                                    const ageInfo = '${hasAgeInfo ? ` (${Math.abs(calculateAge(appState.person1.birthDate) - calculateAge(appState.person2.birthDate))}살차이)` : ''}';
+                                    const text = '${appState.person1.name}(${appState.person1.mbti})님과 ${appState.person2.name}(${appState.person2.mbti})님의 케미는 ${appState.result.overall}점! 🔥' + genderInfo + ageInfo;
                                     if (navigator.share) {
-                                        navigator.share({title: 'MBTI 케미 체크 결과', text: text});
+                                        navigator.share({title: 'MBTI 케미 체크 v2.0 결과', text: text});
                                     } else {
                                         navigator.clipboard.writeText(text);
                                         alert('결과가 클립보드에 복사되었습니다!');
@@ -747,14 +1122,14 @@
                 return;
             }
 
-            // 메인 입력 화면
+            // 메인 입력 화면 (확장된 필드 포함)
             root.innerHTML = `
                 <div class="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4">
                     <div class="max-w-md mx-auto">
                         <div class="text-center mb-8 pt-8">
                             <div class="flex items-center justify-center mb-4">
                                 <span class="text-2xl mr-2">💕</span>
-                                <h1 class="text-xl md:text-3xl font-bold text-gray-800">MBTI 케미 체크</h1>
+                                <h1 class="text-xl md:text-3xl font-bold text-gray-800">MBTI 케미 체크 v2.0</h1>
                                 <div class="flex ml-4 space-x-2">
                                     ${createButton('📋', 'updateState({showHistory: true})', 
                                         'p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-white hover:shadow-md transition-all cursor-pointer')}
@@ -762,7 +1137,10 @@
                                         'p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-white hover:shadow-md transition-all cursor-pointer')}
                                 </div>
                             </div>
-                            <p class="text-gray-600">두 사람의 특별한 케미를 확인해보세요!</p>
+                            <p class="text-gray-600">성별과 나이까지 고려한 정밀 케미 분석!</p>
+                            <div class="mt-2 px-4 py-2 bg-blue-100 text-blue-800 rounded-full inline-block text-sm font-medium">
+                                ✨ 업그레이드 완료: 개인화된 매칭 시스템
+                            </div>
                             ${appState.testHistory.length > 0 ? 
                                 `<p class="text-sm text-blue-600 mt-2">💾 ${appState.testHistory.length}개의 테스트 기록이 있어요</p>` : ''}
                         </div>
@@ -778,6 +1156,13 @@
                                         'updateState({person1: {...appState.person1, name: this.value}})', '', 'person1-name')}
                                     ${createSelect(appState.person1.mbti, 'updateStateImmediate({person1: {...appState.person1, mbti: this.value}})', 
                                         [{value: '', text: 'MBTI 유형을 선택해주세요'}, ...mbtiTypes.map(type => ({value: type, text: type}))])}
+                                    
+                                    <div class="grid grid-cols-2 gap-4">
+                                        ${createSelect(appState.person1.gender, 'updateStateImmediate({person1: {...appState.person1, gender: this.value}})', genderOptions)}
+                                        ${createInput('date', '생년월일', appState.person1.birthDate, 
+                                            'updateState({person1: {...appState.person1, birthDate: this.value}})', '', 'person1-birth')}
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-2">💡 성별과 생년월일은 선택사항이지만, 입력하시면 더 정확한 케미 분석이 가능해요!</p>
                                 </div>
                             </div>
 
@@ -791,6 +1176,12 @@
                                         'updateState({person2: {...appState.person2, name: this.value}})', '', 'person2-name')}
                                     ${createSelect(appState.person2.mbti, 'updateStateImmediate({person2: {...appState.person2, mbti: this.value}})', 
                                         [{value: '', text: 'MBTI 유형을 선택해주세요'}, ...mbtiTypes.map(type => ({value: type, text: type}))])}
+                                    
+                                    <div class="grid grid-cols-2 gap-4">
+                                        ${createSelect(appState.person2.gender, 'updateStateImmediate({person2: {...appState.person2, gender: this.value}})', genderOptions)}
+                                        ${createInput('date', '생년월일', appState.person2.birthDate, 
+                                            'updateState({person2: {...appState.person2, birthDate: this.value}})', '', 'person2-birth')}
+                                    </div>
                                 </div>
                             </div>
 
@@ -801,7 +1192,8 @@
                         <div class="bg-white/70 backdrop-blur-sm rounded-2xl p-4 text-center">
                             <p class="text-sm text-gray-600">
                                 🎯 5개 영역별 세부 케미 분석<br>
-                                💫 MBTI 조합별 맞춤 메시지<br>
+                                ✨ 성별 조합별 특화 메시지<br>
+                                🎂 나이 차이 기반 관계 분석<br>
                                 💝 교회 공동체를 위한 특별한 케미 체크
                             </p>
                         </div>
