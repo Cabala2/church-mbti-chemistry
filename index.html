@@ -315,20 +315,104 @@
             return Math.max(25, Math.min(100, baseScore));
         }
 
-        // 개선된 상세 점수 계산
+        // 개선된 상세 점수 계산 (소수점 제거)
         function getAdvancedDetailedScores(mbti1, mbti2, name1 = '', name2 = '', gender1 = '', gender2 = '', birthDate1 = '', birthDate2 = '') {
             const baseDetailedScores = getDetailedScores(mbti1, mbti2, name1, name2);
             const genderBonus = gender1 && gender2 ? getGenderBonus(gender1, gender2) : 0;
             const ageBonus = birthDate1 && birthDate2 ? getAgeBonus(birthDate1, birthDate2) : 0;
             
-            // 영역별로 다른 가중치 적용
+            // 영역별로 다른 가중치 적용 후 정수로 반올림
             return {
-                travel: Math.max(20, Math.min(100, baseDetailedScores.travel + genderBonus * 0.8 + ageBonus * 0.6)),
-                faith: Math.max(20, Math.min(100, baseDetailedScores.faith + ageBonus * 1.2)), // 나이 차이가 신앙에 더 영향
-                conversation: Math.max(20, Math.min(100, baseDetailedScores.conversation + genderBonus * 1.2 + ageBonus * 0.8)),
-                teamwork: Math.max(20, Math.min(100, baseDetailedScores.teamwork + ageBonus * 1.0)),
-                service: Math.max(20, Math.min(100, baseDetailedScores.service + genderBonus * 0.6 + ageBonus * 1.0))
+                travel: Math.round(Math.max(20, Math.min(100, baseDetailedScores.travel + genderBonus * 0.8 + ageBonus * 0.6))),
+                faith: Math.round(Math.max(20, Math.min(100, baseDetailedScores.faith + ageBonus * 1.2))), // 나이 차이가 신앙에 더 영향
+                conversation: Math.round(Math.max(20, Math.min(100, baseDetailedScores.conversation + genderBonus * 1.2 + ageBonus * 0.8))),
+                teamwork: Math.round(Math.max(20, Math.min(100, baseDetailedScores.teamwork + ageBonus * 1.0))),
+                service: Math.round(Math.max(20, Math.min(100, baseDetailedScores.service + genderBonus * 0.6 + ageBonus * 1.0)))
             };
+        }
+
+        // 영역별 상황별 메시지 생성
+        function getAreaSpecificMessage(area, score, gender1 = '', gender2 = '', birthDate1 = '', birthDate2 = '') {
+            const isSameGender = gender1 === gender2;
+            const ageDiff = birthDate1 && birthDate2 ? Math.abs(calculateAge(birthDate1) - calculateAge(birthDate2)) : null;
+            
+            // 점수대별 기본 메시지
+            let baseMessage = '';
+            if (score >= 90) baseMessage = '환상적';
+            else if (score >= 80) baseMessage = '훌륭한';
+            else if (score >= 70) baseMessage = '좋은';
+            else if (score >= 60) baseMessage = '괜찮은';
+            else baseMessage = '발전 가능한';
+            
+            switch(area) {
+                case 'travel':
+                    if (score >= 90) {
+                        if (isSameGender) return `${baseMessage} 여행 파트너! 🗺️ 같은 성별이라 편안하게 여행할 수 있을 거예요!`;
+                        else return `${baseMessage} 여행 파트너! 🗺️ 이성 친구와의 특별한 여행이 될 것 같아요!`;
+                    } else if (score >= 80) {
+                        if (ageDiff && ageDiff <= 1) return `${baseMessage} 여행 케미! 🚗 동갑이라 여행 취향이 비슷할 거예요!`;
+                        else if (ageDiff && ageDiff >= 10) return `${baseMessage} 여행 케미! 🧳 연령대가 다르지만 서로 다른 여행 스타일을 배울 수 있어요!`;
+                        else return `${baseMessage} 여행 케미! ✈️ 함께 새로운 곳을 탐험하면 재밌을 거예요!`;
+                    } else if (score >= 60) {
+                        return `${baseMessage} 여행 관계! 🏞️ 짧은 당일치기부터 시작해보세요!`;
+                    } else {
+                        return `${baseMessage} 여행 관계! 🚶‍♀️ 가까운 카페 투어부터 천천히 시작해보세요!`;
+                    }
+                    
+                case 'faith':
+                    if (score >= 90) {
+                        if (ageDiff && ageDiff >= 10) return `${baseMessage} 신앙 파트너! 📖 나이 차이를 활용한 멘토링 관계가 될 것 같아요!`;
+                        else if (ageDiff && ageDiff <= 1) return `${baseMessage} 신앙 파트너! ✨ 동갑이라 함께 신앙 성장하기 좋을 거예요!`;
+                        else return `${baseMessage} 신앙 파트너! 🙏 서로의 신앙에 큰 힘이 될 것 같아요!`;
+                    } else if (score >= 80) {
+                        return `${baseMessage} 신앙 케미! 📚 성경공부나 큐티를 함께 하면 좋을 거예요!`;
+                    } else if (score >= 60) {
+                        return `${baseMessage} 신앙 관계! ⛪ 예배 후 나누는 대화부터 시작해보세요!`;
+                    } else {
+                        return `${baseMessage} 신앙 관계! 💭 서로 다른 신앙관을 존중하며 배워가요!`;
+                    }
+                    
+                case 'conversation':
+                    if (score >= 90) {
+                        if (isSameGender) return `${baseMessage} 대화 파트너! 💬 동성 친구라 더 편하게 마음을 나눌 수 있을 거예요!`;
+                        else return `${baseMessage} 대화 파트너! 💕 이성 친구로서 새로운 관점을 주고받을 수 있어요!`;
+                    } else if (score >= 80) {
+                        if (ageDiff && ageDiff <= 1) return `${baseMessage} 대화 케미! 🗣️ 동갑이라 공감대가 풍부할 거예요!`;
+                        else return `${baseMessage} 대화 케미! 💭 서로 다른 경험을 나누며 대화가 풍성해질 거예요!`;
+                    } else if (score >= 60) {
+                        return `${baseMessage} 대화 관계! ☕ 가벼운 일상 이야기부터 시작해보세요!`;
+                    } else {
+                        return `${baseMessage} 대화 관계! 🤔 공통 관심사를 찾아가며 대화를 늘려가요!`;
+                    }
+                    
+                case 'teamwork':
+                    if (score >= 90) {
+                        if (ageDiff && ageDiff >= 10) return `${baseMessage} 팀워크! 👥 나이 차이를 활용한 역할 분담이 완벽할 거예요!`;
+                        else return `${baseMessage} 팀워크! 🤝 함께 일하면 시너지가 폭발할 것 같아요!`;
+                    } else if (score >= 80) {
+                        return `${baseMessage} 팀워크! ⚡ 소그룹 활동에서 좋은 파트너가 될 거예요!`;
+                    } else if (score >= 60) {
+                        return `${baseMessage} 팀워크! 🎯 단순한 작업부터 함께 해보세요!`;
+                    } else {
+                        return `${baseMessage} 팀워크! 💪 서로의 강점을 파악하며 협력해 나가요!`;
+                    }
+                    
+                case 'service':
+                    if (score >= 90) {
+                        if (isSameGender) return `${baseMessage} 봉사 파트너! 🤝 같은 성별이라 편안하게 섬길 수 있을 거예요!`;
+                        else return `${baseMessage} 봉사 파트너! 💖 이성 친구와 함께하는 건전한 봉사가 될 거예요!`;
+                    } else if (score >= 80) {
+                        if (ageDiff && ageDiff >= 10) return `${baseMessage} 봉사 케미! 🌟 연령대가 다른 만큼 다양한 봉사 아이디어가 나올 거예요!`;
+                        else return `${baseMessage} 봉사 케미! 🙌 함께 섬기면 더 큰 기쁨을 느낄 수 있을 거예요!`;
+                    } else if (score >= 60) {
+                        return `${baseMessage} 봉사 관계! 🧹 간단한 교회 청소부터 함께 해보세요!`;
+                    } else {
+                        return `${baseMessage} 봉사 관계! 🎁 각자 잘하는 봉사를 찾아서 도와주세요!`;
+                    }
+                    
+                default:
+                    return `${baseMessage} 케미입니다!`;
+            }
         }
 
         function getDetailedScores(mbti1, mbti2, person1Name = '', person2Name = '') {
@@ -482,11 +566,21 @@
                     appState.person1.gender, appState.person2.gender,
                     appState.person1.birthDate, appState.person2.birthDate
                 );
+
+                // 영역별 메시지 생성
+                const areaMessages = {
+                    travel: getAreaSpecificMessage('travel', detailedScores.travel, appState.person1.gender, appState.person2.gender, appState.person1.birthDate, appState.person2.birthDate),
+                    faith: getAreaSpecificMessage('faith', detailedScores.faith, appState.person1.gender, appState.person2.gender, appState.person1.birthDate, appState.person2.birthDate),
+                    conversation: getAreaSpecificMessage('conversation', detailedScores.conversation, appState.person1.gender, appState.person2.gender, appState.person1.birthDate, appState.person2.birthDate),
+                    teamwork: getAreaSpecificMessage('teamwork', detailedScores.teamwork, appState.person1.gender, appState.person2.gender, appState.person1.birthDate, appState.person2.birthDate),
+                    service: getAreaSpecificMessage('service', detailedScores.service, appState.person1.gender, appState.person2.gender, appState.person1.birthDate, appState.person2.birthDate)
+                };
                 
                 const finalResult = {
                     overall: overallScore,
                     message: message,
-                    detailed: detailedScores
+                    detailed: detailedScores,
+                    areaMessages: areaMessages
                 };
                 
                 updateStateImmediate({ result: finalResult, currentStep: 'result' });
@@ -1093,10 +1187,15 @@
                                                 ${appState.result.detailed[item.key]}점
                                             </span>
                                         </div>
-                                        <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="w-full bg-gray-200 rounded-full h-2 mb-3">
                                             <div class="bg-gradient-to-r ${item.color} h-2 rounded-full transition-all duration-1000" 
                                                  style="width: ${appState.result.detailed[item.key]}%"></div>
                                         </div>
+                                        ${appState.result.areaMessages && appState.result.areaMessages[item.key] ? `
+                                            <p class="text-sm text-gray-600 leading-relaxed">
+                                                ${appState.result.areaMessages[item.key]}
+                                            </p>
+                                        ` : ''}
                                     </div>
                                 `).join('')}
                             </div>
